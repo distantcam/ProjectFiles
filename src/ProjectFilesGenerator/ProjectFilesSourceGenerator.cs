@@ -14,7 +14,7 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
     {
         // Get all additional files that are .csproj files
         var projectFiles = context.AdditionalTextsProvider
-            .Where(file => file.Path.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase));
+            .Where(_ => _.Path.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase));
 
         // Parse the project file and extract file paths
         var filePaths = projectFiles
@@ -27,7 +27,7 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
                 var projectDir = Path.GetDirectoryName(file.Path) ?? string.Empty;
                 return ParseProjectFile(text.ToString(), projectDir);
             })
-            .Where(files => files.Length > 0);
+            .Where(_ => _.Length > 0);
 
         // Generate the source
         context.RegisterSourceOutput(filePaths, (spc, files) =>
@@ -42,22 +42,21 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
         try
         {
             var doc = XDocument.Parse(content);
-            var ns = doc.Root?.Name.Namespace ?? XNamespace.None;
 
             var files = new List<string>();
 
             // Find all None, Content, and other item types with CopyToOutputDirectory
             var itemGroups = doc.Descendants()
-                .Where(e => e.Name.LocalName == "ItemGroup");
+                .Where(_ => _.Name.LocalName == "ItemGroup");
 
             foreach (var itemGroup in itemGroups)
             {
                 foreach (var item in itemGroup.Elements())
                 {
                     var copyToOutput = item.Elements()
-                        .FirstOrDefault(e => e.Name.LocalName == "CopyToOutputDirectory");
+                        .FirstOrDefault(_ => _.Name.LocalName == "CopyToOutputDirectory");
 
-                    if (copyToOutput?.Value == "PreserveNewest" || copyToOutput?.Value == "Always")
+                    if (copyToOutput?.Value is "PreserveNewest" or "Always")
                     {
                         var includeAttr = item.Attribute("Include")?.Value ?? item.Attribute("Update")?.Value;
                         if (!string.IsNullOrEmpty(includeAttr))
@@ -70,7 +69,7 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
                 }
             }
 
-            return files.Distinct().OrderBy(f => f).ToImmutableArray();
+            return files.Distinct().OrderBy(_ => _).ToImmutableArray();
         }
         catch
         {
@@ -84,7 +83,9 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
         pattern = pattern.Replace('/', Path.DirectorySeparatorChar);
 
         if (!Directory.Exists(projectDir))
+        {
             return Enumerable.Empty<string>();
+        }
 
         // Check if pattern contains wildcards
         if (pattern.Contains("*") || pattern.Contains("?"))
@@ -96,9 +97,9 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
             {
                 // Handle ** recursive pattern
                 var beforeRecursive = string.Join(Path.DirectorySeparatorChar.ToString(),
-                    parts.TakeWhile(p => p != "**"));
+                    parts.TakeWhile(_ => _ != "**"));
                 var afterRecursive = string.Join(Path.DirectorySeparatorChar.ToString(),
-                    parts.SkipWhile(p => p != "**").Skip(1));
+                    parts.SkipWhile(_ => _ != "**").Skip(1));
 
                 var searchDir = string.IsNullOrEmpty(beforeRecursive)
                     ? projectDir
@@ -143,15 +144,13 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
                 }
             }
         }
-        else
-        {
-            // No wildcards - just return the file if it exists
-            var fullPath = Path.Combine(projectDir, pattern);
-            return File.Exists(fullPath) ? [pattern] : Enumerable.Empty<string>();
-        }
+
+        // No wildcards - just return the file if it exists
+        var fullPath = Path.Combine(projectDir, pattern);
+        return File.Exists(fullPath) ? [pattern] : Enumerable.Empty<string>();
     }
 
-    private static string GetRelativePath(string basePath, string fullPath)
+    static string GetRelativePath(string basePath, string fullPath)
     {
         var baseUri = new Uri(EnsureTrailingSlash(basePath));
         var fullUri = new Uri(fullPath);
@@ -159,37 +158,41 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
         return Uri.UnescapeDataString(relativeUri.ToString()).Replace('/', Path.DirectorySeparatorChar);
     }
 
-    private static string EnsureTrailingSlash(string path)
+    static string EnsureTrailingSlash(string path)
     {
-        if (!path.EndsWith(Path.DirectorySeparatorChar.ToString()))
-            return path + Path.DirectorySeparatorChar;
-        return path;
+        if (path.EndsWith(Path.DirectorySeparatorChar.ToString()))
+        {
+            return path;
+        }
+
+        return path + Path.DirectorySeparatorChar;
+
     }
 
-    private static string GenerateSource(ImmutableArray<string> files)
+    static string GenerateSource(ImmutableArray<string> files)
     {
         var tree = BuildFileTree(files);
-        var sb = new StringBuilder();
+        var builder = new StringBuilder();
 
-        sb.AppendLine("// <auto-generated/>");
-        sb.AppendLine("#nullable enable");
-        sb.AppendLine();
-        sb.AppendLine("namespace ProjectFiles;");
-        sb.AppendLine();
-        sb.AppendLine("/// <summary>");
-        sb.AppendLine("/// Provides strongly-typed access to project files marked with CopyToOutputDirectory.");
-        sb.AppendLine("/// </summary>");
-        sb.AppendLine("public static partial class ProjectFiles");
-        sb.AppendLine("{");
+        builder.AppendLine("// <auto-generated/>");
+        builder.AppendLine("#nullable enable");
+        builder.AppendLine();
+        builder.AppendLine("namespace ProjectFiles;");
+        builder.AppendLine();
+        builder.AppendLine("/// <summary>");
+        builder.AppendLine("/// Provides strongly-typed access to project files marked with CopyToOutputDirectory.");
+        builder.AppendLine("/// </summary>");
+        builder.AppendLine("public static partial class ProjectFiles");
+        builder.AppendLine("{");
 
-        GenerateTreeNode(sb, tree, 1);
+        GenerateTreeNode(builder, tree, 1);
 
-        sb.AppendLine("}");
+        builder.AppendLine("}");
 
-        return sb.ToString();
+        return builder.ToString();
     }
 
-    private static FileTreeNode BuildFileTree(ImmutableArray<string> files)
+    static FileTreeNode BuildFileTree(ImmutableArray<string> files)
     {
         var root = new FileTreeNode { Name = "Root", IsDirectory = true };
 
@@ -221,11 +224,11 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
         return root;
     }
 
-    private static void GenerateTreeNode(StringBuilder sb, FileTreeNode node, int indent)
+    static void GenerateTreeNode(StringBuilder builder, FileTreeNode node, int indent)
     {
         var indentStr = new string(' ', indent * 4);
 
-        foreach (var child in node.Children.OrderBy(kvp => kvp.Key))
+        foreach (var child in node.Children.OrderBy(_ => _.Key))
         {
             var name = child.Key;
             var childNode = child.Value;
@@ -234,16 +237,16 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
             {
                 // Generate nested static class for directory
                 var className = ToValidIdentifier(name);
-                sb.AppendLine($"{indentStr}/// <summary>");
-                sb.AppendLine($"{indentStr}/// Files in the '{name}' directory.");
-                sb.AppendLine($"{indentStr}/// </summary>");
-                sb.AppendLine($"{indentStr}public static partial class {className}");
-                sb.AppendLine($"{indentStr}{{");
+                builder.AppendLine($"{indentStr}/// <summary>");
+                builder.AppendLine($"{indentStr}/// Files in the '{name}' directory.");
+                builder.AppendLine($"{indentStr}/// </summary>");
+                builder.AppendLine($"{indentStr}public static partial class {className}");
+                builder.AppendLine($"{indentStr}{{");
 
-                GenerateTreeNode(sb, childNode, indent + 1);
+                GenerateTreeNode(builder, childNode, indent + 1);
 
-                sb.AppendLine($"{indentStr}}}");
-                sb.AppendLine();
+                builder.AppendLine($"{indentStr}}}");
+                builder.AppendLine();
             }
             else
             {
@@ -257,19 +260,21 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
 
                 var path = childNode.FullPath!.Replace("\\", "\\\\");
 
-                sb.AppendLine($"{indentStr}/// <summary>");
-                sb.AppendLine($"{indentStr}/// Path to '{name}'.");
-                sb.AppendLine($"{indentStr}/// </summary>");
-                sb.AppendLine($"{indentStr}public static string {propertyName} => \"{path}\";");
-                sb.AppendLine();
+                builder.AppendLine($"{indentStr}/// <summary>");
+                builder.AppendLine($"{indentStr}/// Path to '{name}'.");
+                builder.AppendLine($"{indentStr}/// </summary>");
+                builder.AppendLine($"{indentStr}public static string {propertyName} => \"{path}\";");
+                builder.AppendLine();
             }
         }
     }
 
-    private static string ToValidIdentifier(string name, bool capitalizeFirst = false)
+    static string ToValidIdentifier(string name, bool capitalizeFirst = false)
     {
         if (string.IsNullOrEmpty(name))
+        {
             return "_";
+        }
 
         var sb = new StringBuilder();
         var capitalizeNext = capitalizeFirst;
@@ -315,7 +320,7 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
         return string.IsNullOrEmpty(result) ? "_" : result;
     }
 
-    private static bool IsCSharpKeyword(string identifier)
+    static bool IsCSharpKeyword(string identifier)
     {
         var keywords = new HashSet<string>
         {
@@ -333,7 +338,7 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
         return keywords.Contains(identifier);
     }
 
-    private class FileTreeNode
+    class FileTreeNode
     {
         public string Name { get; set; } = string.Empty;
         public bool IsDirectory { get; set; }
