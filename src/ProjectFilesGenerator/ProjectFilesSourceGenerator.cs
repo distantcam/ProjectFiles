@@ -22,7 +22,9 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
             {
                 var text = file.GetText(cancellationToken);
                 if (text == null)
+                {
                     return ImmutableArray<string>.Empty;
+                }
 
                 var projectDir = Path.GetDirectoryName(file.Path) ?? string.Empty;
                 return ParseProjectFile(text.ToString(), projectDir);
@@ -39,56 +41,50 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
 
     private static ImmutableArray<string> ParseProjectFile(string content, string projectDir)
     {
-        try
+        var doc = XDocument.Parse(content);
+
+        var files = new List<string>();
+
+        // Find all None, Content, and other item types with CopyToOutputDirectory
+        var itemGroups = doc.Descendants()
+            .Where(_ => _.Name.LocalName == "ItemGroup");
+
+        foreach (var itemGroup in itemGroups)
         {
-            var doc = XDocument.Parse(content);
-
-            var files = new List<string>();
-
-            // Find all None, Content, and other item types with CopyToOutputDirectory
-            var itemGroups = doc.Descendants()
-                .Where(_ => _.Name.LocalName == "ItemGroup");
-
-            foreach (var itemGroup in itemGroups)
+            foreach (var item in itemGroup.Elements())
             {
-                foreach (var item in itemGroup.Elements())
-                {
-                    var copyToOutput = item.Elements()
-                        .FirstOrDefault(_ => _.Name.LocalName == "CopyToOutputDirectory");
+                var copyToOutput = item.Elements()
+                    .FirstOrDefault(_ => _.Name.LocalName == "CopyToOutputDirectory");
 
-                    if (copyToOutput?.Value is "PreserveNewest" or "Always")
+                if (copyToOutput?.Value is "PreserveNewest" or "Always")
+                {
+                    var includeAttr = item.Attribute("Include")?.Value ?? item.Attribute("Update")?.Value;
+                    if (!string.IsNullOrEmpty(includeAttr))
                     {
-                        var includeAttr = item.Attribute("Include")?.Value ?? item.Attribute("Update")?.Value;
-                        if (!string.IsNullOrEmpty(includeAttr))
-                        {
-                            // Expand glob patterns
-                            var expandedFiles = ExpandGlobPattern(includeAttr!, projectDir);
-                            files.AddRange(expandedFiles);
-                        }
+                        // Expand glob patterns
+                        var expandedFiles = ExpandGlobPattern(includeAttr!, projectDir);
+                        files.AddRange(expandedFiles);
                     }
                 }
             }
+        }
 
-            return files.Distinct().OrderBy(_ => _).ToImmutableArray();
-        }
-        catch
-        {
-            return ImmutableArray<string>.Empty;
-        }
+        return files.Distinct().OrderBy(_ => _).ToImmutableArray();
     }
 
-    private static IEnumerable<string> ExpandGlobPattern(string pattern, string projectDir)
+    static IEnumerable<string> ExpandGlobPattern(string pattern, string projectDir)
     {
         // Normalize path separators
         pattern = pattern.Replace('/', Path.DirectorySeparatorChar);
 
         if (!Directory.Exists(projectDir))
         {
-            return Enumerable.Empty<string>();
+            return [];
         }
 
         // Check if pattern contains wildcards
-        if (pattern.Contains("*") || pattern.Contains("?"))
+        if (pattern.Contains("*") ||
+            pattern.Contains("?"))
         {
             var parts = pattern.Split(Path.DirectorySeparatorChar);
             var hasRecursive = parts.Contains("**");
@@ -106,19 +102,14 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
                     : Path.Combine(projectDir, beforeRecursive);
 
                 if (!Directory.Exists(searchDir))
-                    return Enumerable.Empty<string>();
+                {
+                    return [];
+                }
 
                 var searchPattern = string.IsNullOrEmpty(afterRecursive) ? "*.*" : afterRecursive;
 
-                try
-                {
-                    var foundFiles = Directory.GetFiles(searchDir, searchPattern, SearchOption.AllDirectories);
-                    return foundFiles.Select(f => GetRelativePath(projectDir, f));
-                }
-                catch
-                {
-                    return Enumerable.Empty<string>();
-                }
+                var foundFiles = Directory.GetFiles(searchDir, searchPattern, SearchOption.AllDirectories);
+                return foundFiles.Select(f => GetRelativePath(projectDir, f));
             }
             else
             {
@@ -133,15 +124,8 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
                 if (!Directory.Exists(searchDir))
                     return Enumerable.Empty<string>();
 
-                try
-                {
-                    var foundFiles = Directory.GetFiles(searchDir, filePart);
-                    return foundFiles.Select(f => GetRelativePath(projectDir, f));
-                }
-                catch
-                {
-                    return Enumerable.Empty<string>();
-                }
+                var foundFiles = Directory.GetFiles(searchDir, filePart);
+                return foundFiles.Select(f => GetRelativePath(projectDir, f));
             }
         }
 
@@ -194,7 +178,11 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
 
     static FileTreeNode BuildFileTree(ImmutableArray<string> files)
     {
-        var root = new FileTreeNode { Name = "Root", IsDirectory = true };
+        var root = new FileTreeNode
+        {
+            Name = "Root",
+            IsDirectory = true
+        };
 
         foreach (var file in files)
         {
@@ -324,15 +312,83 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
     {
         var keywords = new HashSet<string>
         {
-            "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked",
-            "class", "const", "continue", "decimal", "default", "delegate", "do", "double", "else",
-            "enum", "event", "explicit", "extern", "false", "finally", "fixed", "float", "for",
-            "foreach", "goto", "if", "implicit", "in", "int", "interface", "internal", "is", "lock",
-            "long", "namespace", "new", "null", "object", "operator", "out", "override", "params",
-            "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed",
-            "short", "sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw",
-            "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using",
-            "virtual", "void", "volatile", "while"
+            "abstract",
+            "as",
+            "base",
+            "bool",
+            "break",
+            "byte",
+            "case",
+            "catch",
+            "char",
+            "checked",
+            "class",
+            "const",
+            "continue",
+            "decimal",
+            "default",
+            "delegate",
+            "do",
+            "double",
+            "else",
+            "enum",
+            "event",
+            "explicit",
+            "extern",
+            "false",
+            "finally",
+            "fixed",
+            "float",
+            "for",
+            "foreach",
+            "goto",
+            "if",
+            "implicit",
+            "in",
+            "int",
+            "interface",
+            "internal",
+            "is",
+            "lock",
+            "long",
+            "namespace",
+            "new",
+            "null",
+            "object",
+            "operator",
+            "out",
+            "override",
+            "params",
+            "private",
+            "protected",
+            "public",
+            "readonly",
+            "ref",
+            "return",
+            "sbyte",
+            "sealed",
+            "short",
+            "sizeof",
+            "stackalloc",
+            "static",
+            "string",
+            "struct",
+            "switch",
+            "this",
+            "throw",
+            "true",
+            "try",
+            "typeof",
+            "uint",
+            "ulong",
+            "unchecked",
+            "unsafe",
+            "ushort",
+            "using",
+            "virtual",
+            "void",
+            "volatile",
+            "while"
         };
 
         return keywords.Contains(identifier);
