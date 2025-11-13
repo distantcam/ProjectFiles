@@ -1,0 +1,6 @@
+# Verify temporary comparison files
+# These are generated during test runs and should not be committed
+*.received.*
+
+# Only commit .verified.* files
+# These are the approved snapshots

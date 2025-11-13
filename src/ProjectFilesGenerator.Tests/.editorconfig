@@ -1,0 +1,16 @@
+# EditorConfig for ProjectFilesGenerator.Tests
+
+root = true
+
+[*.cs]
+# Verify prefers line-by-line comparison
+insert_final_newline = true
+end_of_line = lf
+
+[*.verified.txt]
+# Snapshot files
+insert_final_newline = true
+
+[*.received.txt]
+# Temporary comparison files
+insert_final_newline = true
