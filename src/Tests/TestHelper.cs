@@ -1,38 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Text;
 using ProjectFilesGenerator;
-using VerifyTests;
-using VerifyXunit;
-
-namespace ProjectFilesGenerator.Tests;
 
 public static class TestHelper
 {
-    static TestHelper()
-    {
-        // Configure Verify for source generator testing
-        VerifySourceGenerators.Initialize();
-        
-        // Customize settings
-        VerifierSettings.DerivePathInfo(
-            (sourceFile, projectDirectory, type, method) => 
-                new PathInfo(
-                    directory: Path.Combine(projectDirectory, "Snapshots"),
-                    typeName: type.Name,
-                    methodName: method.Name));
-    }
-
     public static Task Verify(
         string projectContent,
-        params string[] filePaths,
+        string[] filePaths,
         [CallerMemberName] string testName = "")
     {
         // Create a temporary directory for the test
@@ -51,12 +26,12 @@ public static class TestHelper
                 var normalizedPath = filePath.Replace('/', Path.DirectorySeparatorChar);
                 var fullPath = Path.Combine(tempDir, normalizedPath);
                 var directory = Path.GetDirectoryName(fullPath);
-                
+
                 if (!string.IsNullOrEmpty(directory))
                 {
                     Directory.CreateDirectory(directory);
                 }
-                
+
                 File.WriteAllText(fullPath, $"Test content for {Path.GetFileName(fullPath)}");
             }
 
@@ -74,7 +49,7 @@ public static class TestHelper
                 """;
 
             var syntaxTree = CSharpSyntaxTree.ParseText(source);
-            
+
             var references = new[]
             {
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
@@ -83,9 +58,9 @@ public static class TestHelper
 
             var compilation = CSharpCompilation.Create(
                 assemblyName: "TestProject",
-                syntaxTrees: new[] { syntaxTree },
+                syntaxTrees: [syntaxTree],
                 references: references,
-                options: new CSharpCompilationOptions(OutputKind.ConsoleApplication));
+                options: new(OutputKind.ConsoleApplication));
 
             // Create the source generator
             var generator = new ProjectFilesSourceGenerator();
@@ -95,7 +70,7 @@ public static class TestHelper
 
             // Run the generator
             GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-            driver = driver.AddAdditionalTexts(ImmutableArray.Create<AdditionalText>(additionalText));
+            driver = driver.AddAdditionalTexts([additionalText]);
             driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
 
             // Get the results
@@ -103,7 +78,6 @@ public static class TestHelper
 
             // Verify using Verify.SourceGenerators
             return Verifier.Verify(runResult)
-                .UseDirectory("Snapshots")
                 .UseMethodName(testName);
         }
         finally
@@ -123,21 +97,12 @@ public static class TestHelper
         }
     }
 
-    private class TestAdditionalText : AdditionalText
+    class TestAdditionalText(string path, string text) :
+        AdditionalText
     {
-        private readonly string _text;
+        public override string Path { get; } = path;
 
-        public TestAdditionalText(string path, string text)
-        {
-            Path = path;
-            _text = text;
-        }
-
-        public override string Path { get; }
-
-        public override SourceText? GetText(CancellationToken cancellationToken = default)
-        {
-            return SourceText.From(_text);
-        }
+        public override SourceText GetText(CancellationToken cancellationToken = default) =>
+            SourceText.From(text);
     }
 }

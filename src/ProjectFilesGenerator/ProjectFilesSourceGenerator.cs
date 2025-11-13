@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -68,7 +63,7 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
                         if (!string.IsNullOrEmpty(includeAttr))
                         {
                             // Expand glob patterns
-                            var expandedFiles = ExpandGlobPattern(includeAttr, projectDir);
+                            var expandedFiles = ExpandGlobPattern(includeAttr!, projectDir);
                             files.AddRange(expandedFiles);
                         }
                     }
@@ -152,7 +147,7 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
         {
             // No wildcards - just return the file if it exists
             var fullPath = Path.Combine(projectDir, pattern);
-            return File.Exists(fullPath) ? new[] { pattern } : Enumerable.Empty<string>();
+            return File.Exists(fullPath) ? [pattern] : Enumerable.Empty<string>();
         }
     }
 
@@ -203,14 +198,14 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
             var parts = file.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             var current = root;
 
-            for (int i = 0; i < parts.Length; i++)
+            for (var i = 0; i < parts.Length; i++)
             {
                 var part = parts[i];
                 var isLast = i == parts.Length - 1;
 
                 if (!current.Children.TryGetValue(part, out var child))
                 {
-                    child = new FileTreeNode
+                    child = new()
                     {
                         Name = part,
                         IsDirectory = !isLast,
@@ -343,6 +338,6 @@ public class ProjectFilesSourceGenerator : IIncrementalGenerator
         public string Name { get; set; } = string.Empty;
         public bool IsDirectory { get; set; }
         public string? FullPath { get; set; }
-        public Dictionary<string, FileTreeNode> Children { get; } = new Dictionary<string, FileTreeNode>();
+        public Dictionary<string, FileTreeNode> Children { get; } = [];
     }
 }

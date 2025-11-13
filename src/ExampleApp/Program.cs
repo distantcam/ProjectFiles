@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using ProjectFiles;
 
 // Example usage of the generated ProjectFiles API
 Console.WriteLine("=== Project Files Demo ===");
