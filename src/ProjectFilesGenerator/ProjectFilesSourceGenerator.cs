@@ -5,6 +5,23 @@
 public class ProjectFilesSourceGenerator :
     IIncrementalGenerator
 {
+    static string projectFileContent;
+    static string projectDirectoryContent;
+
+    static ProjectFilesSourceGenerator()
+    {
+        projectFileContent  = ReadResouce("ProjectFile");
+        projectDirectoryContent  = ReadResouce("ProjectDirecotry");
+    }
+
+    static string ReadResouce(string name)
+    {
+        var assembly = typeof(ProjectFilesSourceGenerator).Assembly;
+        using var stream = assembly.GetManifestResourceStream($"ProjectFilesGenerator.{name}.cs")!;
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
+    }
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Get all additional files that are .csproj files
@@ -31,6 +48,8 @@ public class ProjectFilesSourceGenerator :
         {
             var source = GenerateSource(files);
             spc.AddSource("ProjectFiles.g.cs", SourceText.From(source, Encoding.UTF8));
+            spc.AddSource("ProjectFiles.ProjectDirectory.g.cs", SourceText.From(projectDirectoryContent, Encoding.UTF8));
+            spc.AddSource("ProjectFiles.ProjectFile.g.cs", SourceText.From(projectFileContent, Encoding.UTF8));
         });
     }
 
