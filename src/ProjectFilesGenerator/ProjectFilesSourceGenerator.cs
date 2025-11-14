@@ -198,18 +198,20 @@ public class ProjectFilesSourceGenerator :
 
         foreach (var (name, childNode) in node.Children.OrderBy(_ => _.Key))
         {
-            if (childNode.IsDirectory)
+            if (!childNode.IsDirectory)
             {
-                var className = ToValidIdentifier(name);
-                builder.AppendLine(
-                    $"""
-                     {indent}/// <summary>
-                     {indent}/// Files in the '{name}' directory.
-                     {indent}/// </summary>
-                     {indent}public static {className} {className} => new();
-                     """);
-                builder.AppendLine();
+                continue;
             }
+
+            var className = ToValidIdentifier(name);
+            builder.AppendLine(
+                $"""
+                 {indent}/// <summary>
+                 {indent}/// Files in the '{name}' directory.
+                 {indent}/// </summary>
+                 {indent}public static {className} {className} => new();
+                 """);
+            builder.AppendLine();
         }
     }
 
