@@ -195,9 +195,9 @@ public class ProjectFilesSourceGenerator :
 
     static void GenerateRootProperties(StringBuilder builder, List<FileTreeNode> topLevelNodes)
     {
-        foreach (var node in topLevelNodes.OrderBy(_ => _.Path))
+        foreach (var node in topLevelNodes.OrderBy(_ => _.FullPath))
         {
-            var className = ToValidIdentifier(Path.GetFileName(node.Path));
+            var className = ToValidIdentifier(Path.GetFileName(node.FullPath));
             builder.AppendLine($"        public static {className} {className} {{ get; }} = new();");
         }
     }
@@ -206,9 +206,9 @@ public class ProjectFilesSourceGenerator :
     {
         var indent = new string(' ', indentCount * 4);
 
-        foreach (var node in topLevelNodes.OrderBy(_ => _.Path))
+        foreach (var node in topLevelNodes.OrderBy(_ => _.FullPath))
         {
-            var className = ToValidIdentifier(Path.GetFileName(node.Path));
+            var className = ToValidIdentifier(Path.GetFileName(node.FullPath));
 
             builder.AppendLine(
                 $$"""
@@ -293,10 +293,7 @@ public class ProjectFilesSourceGenerator :
             var topLevelName = parts[0];
             if (!topLevelDirectories.TryGetValue(topLevelName, out var topLevelNode))
             {
-                topLevelNode = new()
-                {
-                    Path = topLevelName
-                };
+                topLevelNode = new FileTreeNode { FullPath = topLevelName };
                 topLevelDirectories[topLevelName] = topLevelNode;
             }
 
@@ -311,10 +308,7 @@ public class ProjectFilesSourceGenerator :
 
                 if (!current.Directories.TryGetValue(part, out var child))
                 {
-                    child = new()
-                    {
-                        Path = currentPath
-                    };
+                    child = new FileTreeNode { FullPath = currentPath };
                     current.Directories[part] = child;
                 }
 
@@ -355,32 +349,38 @@ public class ProjectFilesSourceGenerator :
             }
         }
 
-        var result = builder.ToString();
-
-        // Ensure it starts with a letter or underscore
-        if (result.Length > 0 && char.IsDigit(result[0]))
+        // Handle empty result
+        if (builder.Length == 0)
         {
-            result = "_" + result;
+            return "_";
         }
 
-        // Handle C# keywords
-        if (KeywordDetect.IsCSharpKeyword(result))
+        // Ensure it starts with a letter or underscore
+        if (char.IsDigit(builder[0]))
         {
-            result = "@" + result;
+            builder.Insert(0, '_');
         }
 
         // Capitalize first letter if it's a class/namespace
-        if (result.Length > 0)
+        if (builder.Length > 0 && char.IsLower(builder[0]))
         {
-            result = char.ToUpperInvariant(result[0]) + result[1..];
+            builder[0] = char.ToUpperInvariant(builder[0]);
         }
 
-        return string.IsNullOrEmpty(result) ? "_" : result;
+        // Handle C# keywords
+        var result = builder.ToString();
+        if (KeywordDetect.IsCSharpKeyword(result))
+        {
+            builder.Insert(0, '@');
+            return builder.ToString();
+        }
+
+        return result;
     }
 
     class FileTreeNode
     {
-        public required string Path { get; init; }
+        public required string FullPath { get; init; }
         public Dictionary<string, FileTreeNode> Directories { get; } = [];
         public List<string> Files { get; } = [];
     }
