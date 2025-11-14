@@ -38,7 +38,6 @@ public partial class Config
 {
     public string Appsettings_json => "Config\\appsettings.json";
 }
-
 /// <summary>
 /// Files in the 'Data' directory.
 /// </summary>
@@ -46,7 +45,6 @@ public partial class Data
 {
     public string Users_csv => "Data\\users.csv";
 }
-
 /// <summary>
 /// Files in the 'wwwroot' directory.
 /// </summary>
@@ -54,5 +52,4 @@ public partial class Wwwroot
 {
     public string Index_html => "wwwroot\\index.html";
 }
-
 }

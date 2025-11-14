@@ -30,5 +30,4 @@ public partial class Configs
     public string Database_json => "Configs\\database.json";
     public string Logging_json => "Configs\\logging.json";
 }
-
 }

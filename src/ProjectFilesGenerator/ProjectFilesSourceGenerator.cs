@@ -219,25 +219,26 @@ public class ProjectFilesSourceGenerator :
 
         foreach (var (name, childNode) in node.Children.OrderBy(_ => _.Key))
         {
-            if (childNode.IsDirectory)
+            if (!childNode.IsDirectory)
             {
-                var className = ToValidIdentifier(name);
-
-                builder.AppendLine(
-                    $$"""
-                     {{indent}}/// <summary>
-                     {{indent}}/// Files in the '{{name}}' directory.
-                     {{indent}}/// </summary>
-                     {{indent}}public partial class {{className}}
-                     {{indent}}{
-                     """);
-
-                // Generate file properties and subdirectory properties
-                GenerateDirectoryMembers(builder, childNode, indentCount + 1);
-
-                builder.AppendLine($"{indent}}}");
-                builder.AppendLine();
+                continue;
             }
+
+            var className = ToValidIdentifier(name);
+
+            builder.AppendLine(
+                $$"""
+                  {{indent}}/// <summary>
+                  {{indent}}/// Files in the '{{name}}' directory.
+                  {{indent}}/// </summary>
+                  {{indent}}public partial class {{className}}
+                  {{indent}}{
+                  """);
+
+            // Generate file properties and subdirectory properties
+            GenerateDirectoryMembers(builder, childNode, indentCount + 1);
+
+            builder.AppendLine($"{indent}}}");
         }
     }
 
@@ -266,9 +267,7 @@ public class ProjectFilesSourceGenerator :
             }
 
             var className = ToValidIdentifier(name);
-            var typeName = className + "Type";
-
-            builder.AppendLine($"{indent}public {typeName} {className} = new();");
+            builder.AppendLine($"{indent}public {className}Type {className} = new();");
         }
 
         // Finally, generate nested type definitions for subdirectories
@@ -277,14 +276,13 @@ public class ProjectFilesSourceGenerator :
             if (childNode.IsDirectory)
             {
                 var className = ToValidIdentifier(name);
-                var typeName = className + "Type";
 
                 builder.AppendLine(
                     $$"""
                      {{indent}}/// <summary>
                      {{indent}}/// Files in the '{{name}}' directory.
                      {{indent}}/// </summary>
-                     {{indent}}public partial class {{typeName}}
+                     {{indent}}public partial class {{className}}Type
                      {{indent}}{
                      """);
 
@@ -317,7 +315,6 @@ public class ProjectFilesSourceGenerator :
     {
         var root = new FileTreeNode
         {
-            Name = "Root",
             IsDirectory = true,
             FullPath = null
         };
@@ -336,7 +333,6 @@ public class ProjectFilesSourceGenerator :
                     var isLast = i == parts.Length - 1;
                     child = new()
                     {
-                        Name = part,
                         IsDirectory = !isLast,
                         FullPath = isLast ? file : null
                     };
@@ -402,7 +398,6 @@ public class ProjectFilesSourceGenerator :
 
     class FileTreeNode
     {
-        public required string Name { get; init; }
         public required bool IsDirectory { get; init; }
         public required string? FullPath { get; init; }
         public Dictionary<string, FileTreeNode> Children { get; } = [];

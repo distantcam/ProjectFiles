@@ -46,5 +46,4 @@ public partial class Assets
     }
 
 }
-
 }
