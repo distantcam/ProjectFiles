@@ -255,7 +255,7 @@ public class ProjectFilesSourceGenerator :
             {
                 var className = ToValidIdentifier(name);
                 // generate subdirectory property
-                builder.AppendLine($"{indent}public {className}Type {className} = new();");
+                builder.AppendLine($"{indent}public {className}Type {className} {{ get; }} = new();");
 
                 // generate nested type definitions for subdirectory
                 builder.AppendLine(

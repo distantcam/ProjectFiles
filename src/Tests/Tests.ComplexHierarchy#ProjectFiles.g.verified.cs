@@ -26,13 +26,13 @@ namespace ProjectFilesGenerator.Types
 /// </summary>
 public partial class Assets
 {
-    public DataType Data = new();
+    public DataType Data { get; } = new();
     /// <summary>
     /// Files in the 'Data' directory.
     /// </summary>
     public partial class DataType
     {
-        public ConfigType Config = new();
+        public ConfigType Config { get; } = new();
         /// <summary>
         /// Files in the 'Config' directory.
         /// </summary>
@@ -42,7 +42,7 @@ public partial class Assets
             public string Settings_json => "Assets\\Data\\Config\\settings.json";
         }
 
-        public SeedsType Seeds = new();
+        public SeedsType Seeds { get; } = new();
         /// <summary>
         /// Files in the 'Seeds' directory.
         /// </summary>
@@ -53,7 +53,7 @@ public partial class Assets
 
     }
 
-    public FontsType Fonts = new();
+    public FontsType Fonts { get; } = new();
     /// <summary>
     /// Files in the 'Fonts' directory.
     /// </summary>
@@ -62,13 +62,13 @@ public partial class Assets
         public string Roboto_ttf => "Assets\\Fonts\\roboto.ttf";
     }
 
-    public ImagesType Images = new();
+    public ImagesType Images { get; } = new();
     /// <summary>
     /// Files in the 'Images' directory.
     /// </summary>
     public partial class ImagesType
     {
-        public BackgroundsType Backgrounds = new();
+        public BackgroundsType Backgrounds { get; } = new();
         /// <summary>
         /// Files in the 'Backgrounds' directory.
         /// </summary>
@@ -77,7 +77,7 @@ public partial class Assets
             public string Header_jpg => "Assets\\Images\\Backgrounds\\header.jpg";
         }
 
-        public IconsType Icons = new();
+        public IconsType Icons { get; } = new();
         /// <summary>
         /// Files in the 'Icons' directory.
         /// </summary>
