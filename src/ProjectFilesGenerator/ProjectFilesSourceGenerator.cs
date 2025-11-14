@@ -64,7 +64,10 @@ public class ProjectFilesSourceGenerator :
 
                 // Expand glob patterns
                 var expanded = ExpandGlobPattern(include!, projectDir);
-                files.AddRange(expanded);
+                if (expanded != null)
+                {
+                    files.AddRange(expanded);
+                }
             }
         }
 
@@ -73,14 +76,14 @@ public class ProjectFilesSourceGenerator :
 
     static char separatorChar = Path.DirectorySeparatorChar;
 
-    static IEnumerable<string> ExpandGlobPattern(string pattern, string projectDir)
+    static IEnumerable<string>? ExpandGlobPattern(string pattern, string projectDir)
     {
         // Normalize path separators
         pattern = pattern.Replace('/', separatorChar);
 
         if (!Directory.Exists(projectDir))
         {
-            return [];
+            return null;
         }
 
         // Check if pattern contains wildcards
@@ -102,7 +105,7 @@ public class ProjectFilesSourceGenerator :
 
                 if (!Directory.Exists(searchDir))
                 {
-                    return [];
+                    return null;
                 }
 
                 var searchPattern = string.IsNullOrEmpty(afterRecursive) ? "*.*" : afterRecursive;
@@ -122,7 +125,7 @@ public class ProjectFilesSourceGenerator :
 
                 if (!Directory.Exists(searchDir))
                 {
-                    return [];
+                    return null;
                 }
 
                 var foundFiles = Directory.GetFiles(searchDir, filePart);
@@ -132,7 +135,7 @@ public class ProjectFilesSourceGenerator :
 
         // No wildcards - just return the file if it exists
         var fullPath = Path.Combine(projectDir, pattern);
-        return File.Exists(fullPath) ? [pattern] : [];
+        return File.Exists(fullPath) ? [pattern] : null;
     }
 
     static string GetRelativePath(string basePath, string fullPath)
@@ -194,8 +197,6 @@ public class ProjectFilesSourceGenerator :
 
     static void GenerateRootProperties(StringBuilder builder, FileTreeNode node)
     {
-        const string indent = "        ";
-
         foreach (var (name, childNode) in node.Children.OrderBy(_ => _.Key))
         {
             if (!childNode.IsDirectory)
@@ -206,10 +207,10 @@ public class ProjectFilesSourceGenerator :
             var className = ToValidIdentifier(name);
             builder.AppendLine(
                 $"""
-                 {indent}/// <summary>
-                 {indent}/// Files in the '{name}' directory.
-                 {indent}/// </summary>
-                 {indent}public static {className} {className} => new();
+                         /// <summary>
+                         /// Files in the '{name}' directory.
+                         /// </summary>
+                         public static {className} {className} => new();
                  """);
             builder.AppendLine();
         }
