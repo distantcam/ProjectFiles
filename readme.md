@@ -196,8 +196,7 @@ The generator follows these rules when converting file and directory names to C#
 ### Directory Names → Class Names (PascalCase)
 
 - **Valid characters preserved**: `MyDirectory` → `MyDirectory`
-- **Invalid characters replaced**: `my-directory` → `MyDirectory`
-- **Hyphens capitalize next letter**: `lower-case` → `LowerCase`
+- **Invalid characters replaced**: `my-directory` → `my_directory`
 - **Leading digits prefixed**: `123folder` → `_123folder`
 - **Keywords escaped**: `class` → `@class`
 
@@ -207,19 +206,7 @@ The generator follows these rules when converting file and directory names to C#
 - **Name converted to identifier**: `appsettings.json` → `appsettings_json`
 - **Extension lowercased with underscore**: `File.txt` → `File_txt`
 - **Multiple dots preserved**: `app.config.json` → `app_config_json`
-- **Special characters replaced**: `my-file.xml` → `MyFile_xml`
-
-
-### Examples
-
-| Original Name | Generated Identifier | Type |
-|--------------|---------------------|------|
-| `Config` | `ConfigType` | Class |
-| `lower-case` | `LowerCaseType` | Class |
-| `appsettings.json` | `appsettings_json` | Property |
-| `NestedFile.txt` | `NestedFile_txt` | Property |
-| `my-config.xml` | `MyConfig_xml` | Property |
-| `2024-data` | `_2024Data` | Class |
+- **Special characters replaced**: `my-file.xml` → `my_file_xml`
 
 
 ## Glob Pattern Support
