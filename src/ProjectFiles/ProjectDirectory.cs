@@ -12,5 +12,17 @@ abstract partial class ProjectDirectory(string path)
     public static implicit operator FileInfo(ProjectDirectory temp) =>
         new(temp.Path);
 
+    public IEnumerable<string> EnumerateDirectories() =>
+        Directory.EnumerateDirectories(Path);
+
+    public IEnumerable<string> EnumerateFiles() =>
+        Directory.EnumerateFiles(Path);
+
+    public IEnumerable<string> GetFiles() =>
+        Directory.GetFiles(Path);
+
+    public IEnumerable<string> GetDirectories() =>
+        Directory.GetDirectories(Path);
+
     public DirectoryInfo Info => new(Path);
 }

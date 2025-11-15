@@ -280,10 +280,22 @@ abstract partial class ProjectDirectory(string path)
     public static implicit operator FileInfo(ProjectDirectory temp) =>
         new(temp.Path);
 
+    public IEnumerable<string> EnumerateDirectories() =>
+        Directory.EnumerateDirectories(Path);
+
+    public IEnumerable<string> EnumerateFiles() =>
+        Directory.EnumerateFiles(Path);
+
+    public IEnumerable<string> GetFiles() =>
+        Directory.GetFiles(Path);
+
+    public IEnumerable<string> GetDirectories() =>
+        Directory.GetDirectories(Path);
+
     public DirectoryInfo Info => new(Path);
 }
 ```
-<sup><a href='/src/ProjectFiles/ProjectDirectory.cs#L1-L16' title='Snippet source file'>snippet source</a> | <a href='#snippet-ProjectDirectory.cs' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/ProjectFiles/ProjectDirectory.cs#L1-L28' title='Snippet source file'>snippet source</a> | <a href='#snippet-ProjectDirectory.cs' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -299,6 +311,7 @@ namespace ProjectFilesGenerator;
 partial class ProjectFile(string path)
 {
     public string Path { get; } = path;
+
     public override string ToString() => Path;
 
     public static implicit operator string(ProjectFile temp) =>
@@ -307,10 +320,22 @@ partial class ProjectFile(string path)
     public static implicit operator FileInfo(ProjectFile temp) =>
         new(temp.Path);
 
+    public FileStream OpenRead() =>
+        File.OpenRead(Path);
+
+    public StreamReader OpenText() =>
+        File.OpenText(Path);
+
+    public string ReadAllText() =>
+        File.ReadAllText(Path);
+
+    public Task<string> ReadAllTextAsync() =>
+        File.ReadAllTextAsync(Path);
+
     public FileInfo Info => new(Path);
 }
 ```
-<sup><a href='/src/ProjectFiles/ProjectFile.cs#L1-L15' title='Snippet source file'>snippet source</a> | <a href='#snippet-ProjectFile.cs' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/ProjectFiles/ProjectFile.cs#L1-L28' title='Snippet source file'>snippet source</a> | <a href='#snippet-ProjectFile.cs' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
