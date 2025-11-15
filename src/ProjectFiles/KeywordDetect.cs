@@ -1,6 +1,4 @@
-﻿namespace ProjectFilesGenerator;
-
-static class KeywordDetect
+﻿static class KeywordDetect
 {
     static HashSet<string> keywords =
     [

@@ -1,14 +1,14 @@
-﻿namespace ProjectFilesGenerator;
+﻿namespace ProjectFiles;
 
 [Generator]
 [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers")]
-public class ProjectFilesSourceGenerator :
+public class Generator :
     IIncrementalGenerator
 {
     static string projectFileContent;
     static string projectDirectoryContent;
 
-    static ProjectFilesSourceGenerator()
+    static Generator()
     {
         projectFileContent  = ReadResouce("ProjectFile");
         projectDirectoryContent  = ReadResouce("ProjectDirectory");
@@ -16,8 +16,8 @@ public class ProjectFilesSourceGenerator :
 
     static string ReadResouce(string name)
     {
-        var assembly = typeof(ProjectFilesSourceGenerator).Assembly;
-        using var stream = assembly.GetManifestResourceStream($"ProjectFilesGenerator.{name}.cs")!;
+        var assembly = typeof(Generator).Assembly;
+        using var stream = assembly.GetManifestResourceStream($"ProjectFiles.{name}.cs")!;
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
     }

@@ -7,14 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="buildTransitive\ProjectFiles.props" Pack="true" PackagePath="buildTransitive\" />
+    <None Include="buildTransitive\ProjectFiles.props" Pack="true" PackagePath="build\" />
+
     <PackageReference Include="Polyfill" PrivateAssets="all" />
     <PackageReference Include="ProjectDefaults" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Sbom.Targets" PrivateAssets="all" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="ProjectFile.cs" />
     <EmbeddedResource Include="ProjectDirectory.cs" />
   </ItemGroup>

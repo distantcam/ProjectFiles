@@ -1,3 +1,5 @@
+using ProjectFiles;
+
 public static class TestHelper
 {
     public static GeneratorDriverRunResult Run(string projectContent, string[] filePaths)
@@ -48,7 +50,7 @@ public static class TestHelper
             options: new(OutputKind.ConsoleApplication));
 
         // Create the source generator
-        var generator = new ProjectFilesSourceGenerator();
+        var generator = new Generator();
 
         // Create additional text for the project file
         var additionalText = new TestAdditionalText(projectPath, projectContent);

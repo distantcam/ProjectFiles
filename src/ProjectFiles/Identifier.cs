@@ -1,6 +1,4 @@
-namespace ProjectFilesGenerator;
-
-public class Identifier
+class Identifier
 {
     public static string Build(string name)
     {

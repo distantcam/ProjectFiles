@@ -13,7 +13,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter" />
-    <ProjectReference Include="..\ProjectFilesGenerator\ProjectFilesGenerator.csproj" />
+    <ProjectReference Include="..\ProjectFiles\ProjectFiles.csproj" />
     <PackageReference Include="MarkdownSnippets.MsBuild" PrivateAssets="all" />
   </ItemGroup>
 

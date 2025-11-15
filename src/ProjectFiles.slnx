@@ -11,5 +11,5 @@
   </Folder>
   <Project Path="Tests/Tests.csproj" />
   <Project Path="ConsumingTests/ConsumingTests.csproj" />
-  <Project Path="ProjectFilesGenerator/ProjectFilesGenerator.csproj" />
+  <Project Path="ProjectFiles/ProjectFiles.csproj" />
 </Solution>
