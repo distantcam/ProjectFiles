@@ -1,6 +1,6 @@
 ﻿namespace ProjectFilesGenerator;
 
-class ProjectFile(string path)
+partial class ProjectFile(string path)
 {
     public string Path { get; } = path;
     public override string ToString() => Path;
@@ -11,5 +11,7 @@ class ProjectFile(string path)
     public static implicit operator FileInfo(ProjectFile temp) =>
         new(temp.Path);
 
+    public string ReadAllText() =>
+        File.ReadAllText(Path);
     public FileInfo Info => new(Path);
 }
