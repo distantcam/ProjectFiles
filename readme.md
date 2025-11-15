@@ -50,6 +50,32 @@ Mark files with `CopyToOutputDirectory` set to either `PreserveNewest` or `Alway
 ```
 
 
+## Strong typed file access
+
+The files can be consumed via a strong typed API:
+
+```
+[TestFixture]
+public class ComsumeTests
+{
+    [Test]
+    public void Config() =>
+        IsTrue(File.Exists(ProjectFiles.Config.appsettings_json));
+
+    [Test]
+    public void Recursive() =>
+        IsTrue(File.Exists(ProjectFiles.RecursiveDirectory.SomeFile_txt));
+
+    [Test]
+    public void Specific()
+    {
+        IsTrue(File.Exists(ProjectFiles.SpecificDirectory.Dir1.File1_txt));
+        IsTrue(File.Exists(ProjectFiles.SpecificDirectory.Dir1.File2_txt));
+        IsTrue(File.Exists(ProjectFiles.SpecificDirectory.Dir2.File4_txt));
+        IsTrue(File.Exists(ProjectFiles.SpecificDirectory.File3_txt));
+    }
+```
+
 ## Generated Code Structure
 
 The generator creates three files:
