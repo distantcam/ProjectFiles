@@ -7,7 +7,7 @@ using ProjectFilesGenerator.Types;
 namespace ProjectFilesGenerator
 {
     /// <summary>Provides strongly-typed access to project files marked with CopyToOutputDirectory.</summary>
-    public static partial class ProjectFiles
+    static partial class ProjectFiles
     {
         public static AssetsType Assets { get; } = new();
     }
@@ -15,18 +15,18 @@ namespace ProjectFilesGenerator
 
 namespace ProjectFilesGenerator.Types
 {
-public partial class AssetsType
+partial class AssetsType() : ProjectDirectory("Assets")
 {
     public DataType Data { get; } = new();
     public partial class DataType
     {
-        public string users_csv => "Assets\\Data\\users.csv";
+        public ProjectFile users_csv { get; } = new("Assets/Data/users.csv");
     }
 
     public ImagesType Images { get; } = new();
     public partial class ImagesType
     {
-        public string logo_png => "Assets\\Images\\logo.png";
+        public ProjectFile logo_png { get; } = new("Assets/Images/logo.png");
     }
 
 }

@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="ProjectFile.cs" />
-    <EmbeddedResource Include="ProjectDirecotry.cs" />
+    <EmbeddedResource Include="ProjectDirectory.cs" />
   </ItemGroup>
 
 </Project>

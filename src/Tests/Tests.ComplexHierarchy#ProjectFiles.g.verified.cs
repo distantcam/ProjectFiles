@@ -7,7 +7,7 @@ using ProjectFilesGenerator.Types;
 namespace ProjectFilesGenerator
 {
     /// <summary>Provides strongly-typed access to project files marked with CopyToOutputDirectory.</summary>
-    public static partial class ProjectFiles
+    static partial class ProjectFiles
     {
         public static AssetsType Assets { get; } = new();
     }
@@ -15,7 +15,7 @@ namespace ProjectFilesGenerator
 
 namespace ProjectFilesGenerator.Types
 {
-public partial class AssetsType
+partial class AssetsType() : ProjectDirectory("Assets")
 {
     public DataType Data { get; } = new();
     public partial class DataType
@@ -23,14 +23,14 @@ public partial class AssetsType
         public ConfigType Config { get; } = new();
         public partial class ConfigType
         {
-            public string secrets_json => "Assets\\Data\\Config\\secrets.json";
-            public string settings_json => "Assets\\Data\\Config\\settings.json";
+            public ProjectFile secrets_json { get; } = new("Assets/Data/Config/secrets.json");
+            public ProjectFile settings_json { get; } = new("Assets/Data/Config/settings.json");
         }
 
         public SeedsType Seeds { get; } = new();
         public partial class SeedsType
         {
-            public string users_csv => "Assets\\Data\\Seeds\\users.csv";
+            public ProjectFile users_csv { get; } = new("Assets/Data/Seeds/users.csv");
         }
 
     }
@@ -38,7 +38,7 @@ public partial class AssetsType
     public FontsType Fonts { get; } = new();
     public partial class FontsType
     {
-        public string roboto_ttf => "Assets\\Fonts\\roboto.ttf";
+        public ProjectFile roboto_ttf { get; } = new("Assets/Fonts/roboto.ttf");
     }
 
     public ImagesType Images { get; } = new();
@@ -47,18 +47,18 @@ public partial class AssetsType
         public BackgroundsType Backgrounds { get; } = new();
         public partial class BackgroundsType
         {
-            public string header_jpg => "Assets\\Images\\Backgrounds\\header.jpg";
+            public ProjectFile header_jpg { get; } = new("Assets/Images/Backgrounds/header.jpg");
         }
 
         public IconsType Icons { get; } = new();
         public partial class IconsType
         {
-            public string favicon_ico => "Assets\\Images\\Icons\\favicon.ico";
-            public string logo_png => "Assets\\Images\\Icons\\logo.png";
+            public ProjectFile favicon_ico { get; } = new("Assets/Images/Icons/favicon.ico");
+            public ProjectFile logo_png { get; } = new("Assets/Images/Icons/logo.png");
         }
 
     }
 
-    public string readme_txt => "Assets\\readme.txt";
+    public ProjectFile readme_txt { get; } = new("Assets/readme.txt");
 }
 }

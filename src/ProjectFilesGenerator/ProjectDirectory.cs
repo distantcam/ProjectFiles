@@ -1,5 +1,4 @@
-﻿//HintName: ProjectFiles.ProjectDirectory.g.cs
-namespace ProjectFilesGenerator;
+﻿namespace ProjectFilesGenerator;
 
 abstract class ProjectDirectory(string path)
 {

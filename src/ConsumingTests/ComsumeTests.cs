@@ -17,6 +17,13 @@ public class ComsumeTests
     }
 
     [Test]
+    public void SameNamedDescendants()
+    {
+        IsTrue(File.Exists(ProjectFiles.SameNamedDescendants.SubDir1.NestedFile_txt));
+        IsTrue(File.Exists(ProjectFiles.SameNamedDescendants.SubDir2.NestedFile_txt));
+    }
+
+    [Test]
     public void Config() =>
         IsTrue(File.Exists(ProjectFiles.Config.appsettings_json));
     [Test]

@@ -7,7 +7,7 @@ using ProjectFilesGenerator.Types;
 namespace ProjectFilesGenerator
 {
     /// <summary>Provides strongly-typed access to project files marked with CopyToOutputDirectory.</summary>
-    public static partial class ProjectFiles
+    static partial class ProjectFiles
     {
         public static ConfigType Config { get; } = new();
         public static DataType Data { get; } = new();
@@ -17,16 +17,16 @@ namespace ProjectFilesGenerator
 
 namespace ProjectFilesGenerator.Types
 {
-public partial class ConfigType
+partial class ConfigType() : ProjectDirectory("Config")
 {
-    public string appsettings_json => "Config\\appsettings.json";
+    public ProjectFile appsettings_json { get; } = new("Config/appsettings.json");
 }
-public partial class DataType
+partial class DataType() : ProjectDirectory("Data")
 {
-    public string users_csv => "Data\\users.csv";
+    public ProjectFile users_csv { get; } = new("Data/users.csv");
 }
-public partial class wwwrootType
+partial class wwwrootType() : ProjectDirectory("wwwroot")
 {
-    public string index_html => "wwwroot\\index.html";
+    public ProjectFile index_html { get; } = new("wwwroot/index.html");
 }
 }

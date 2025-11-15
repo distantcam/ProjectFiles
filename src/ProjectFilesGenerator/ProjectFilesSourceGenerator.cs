@@ -11,7 +11,7 @@ public class ProjectFilesSourceGenerator :
     static ProjectFilesSourceGenerator()
     {
         projectFileContent  = ReadResouce("ProjectFile");
-        projectDirectoryContent  = ReadResouce("ProjectDirecotry");
+        projectDirectoryContent  = ReadResouce("ProjectDirectory");
     }
 
     static string ReadResouce(string name)
@@ -190,7 +190,7 @@ public class ProjectFilesSourceGenerator :
             namespace ProjectFilesGenerator
             {
                 /// <summary>Provides strongly-typed access to project files marked with CopyToOutputDirectory.</summary>
-                public static partial class ProjectFiles
+                static partial class ProjectFiles
                 {
             """);
 
@@ -216,7 +216,7 @@ public class ProjectFilesSourceGenerator :
     {
         foreach (var node in topLevelNodes.OrderBy(_ => _.Path))
         {
-            var className = ToValidName(Path.GetFileName(node.Path));
+            var className = Identifier.Build(Path.GetFileName(node.Path));
             builder.AppendLine($"        public static {className}Type {className} {{ get; }} = new();");
         }
     }
@@ -227,11 +227,11 @@ public class ProjectFilesSourceGenerator :
 
         foreach (var node in topLevelNodes.OrderBy(_ => _.Path))
         {
-            var className = ToValidName(Path.GetFileName(node.Path));
-
+            var className = Identifier.Build(Path.GetFileName(node.Path));
+            var pathString = PathToCSharpString(node.Path);
             builder.AppendLine(
                 $$"""
-                  {{indent}}public partial class {{className}}Type
+                  {{indent}}partial class {{className}}Type() : ProjectDirectory({{pathString}})
                   {{indent}}{
                   """);
 
@@ -249,7 +249,7 @@ public class ProjectFilesSourceGenerator :
         // Generate subdirectory properties first
         foreach (var (name, childNode) in node.Directories.OrderBy(_ => _.Key))
         {
-            var className = ToValidName(name);
+            var className = Identifier.Build(name);
             // generate subdirectory property
             builder.AppendLine($"{indent}public {className}Type {className} {{ get; }} = new();");
 
@@ -271,10 +271,16 @@ public class ProjectFilesSourceGenerator :
         {
             var fileName = Path.GetFileName(filePath);
             var propertyName = ToFilePropertyName(fileName);
-            var path = filePath.Replace("\\", @"\\");
+            var path = PathToCSharpString(filePath);
 
-            builder.AppendLine($"""{indent}public string {propertyName} => "{path}";""");
+            builder.AppendLine($$"""{{indent}}public ProjectFile {{propertyName}} { get; } = new({{path}});""");
         }
+    }
+
+    static string PathToCSharpString(string filePath)
+    {
+        var path = filePath.Replace("\\", "/");
+        return $"\"{path}\"";
     }
 
     static string ToFilePropertyName(string fileName)
@@ -282,7 +288,7 @@ public class ProjectFilesSourceGenerator :
         var nameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
         var extension = Path.GetExtension(fileName);
 
-        var propertyName = ToValidName(nameWithoutExtension);
+        var propertyName = Identifier.Build(nameWithoutExtension);
 
         if (!string.IsNullOrEmpty(extension))
         {
@@ -347,38 +353,6 @@ public class ProjectFilesSourceGenerator :
         return topLevelDirectories.Values.ToList();
     }
 
-    static string ToValidName(string name)
-    {
-        var builder = new StringBuilder();
-        var first = name[0];
-        if (char.IsLetter(first) || first == '_')
-        {
-            builder.Append(first);
-        }
-        else
-        {
-            builder.Append('_');
-            if (char.IsDigit(first))
-            {
-                builder.Append(first);
-            }
-        }
-
-        for (var index = 1; index < name.Length; index++)
-        {
-            var ch = name[index];
-            if (char.IsLetterOrDigit(ch))
-            {
-                builder.Append(ch);
-            }
-            else
-            {
-                builder.Append('_');
-            }
-        }
-
-        return KeywordDetect.Sanitize(builder);
-    }
 
     class FileTreeNode
     {

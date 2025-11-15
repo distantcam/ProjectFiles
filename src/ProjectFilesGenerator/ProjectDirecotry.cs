@@ -1,3 +1,0 @@
-﻿namespace ProjectFilesGenerator;
-
-class ProjectDirecotry{}
