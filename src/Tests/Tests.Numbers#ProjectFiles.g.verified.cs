@@ -9,6 +9,8 @@ namespace ProjectFilesGenerator
     /// <summary>Provides strongly-typed access to project files marked with CopyToOutputDirectory.</summary>
     static partial class ProjectFiles
     {
+        public static ProjectFile _1_first_txt { get; } = new("1-first.txt");
+        public static ProjectFile file123_json { get; } = new("file123.json");
     }
 }
 

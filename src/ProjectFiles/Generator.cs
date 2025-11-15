@@ -176,7 +176,7 @@ public class Generator :
 
     static string GenerateSource(ImmutableArray<string> files)
     {
-        var tree = BuildFileTree(files);
+        var (tree, rootFiles) = BuildFileTree(files);
         var builder = new StringBuilder();
 
         builder.AppendLine(
@@ -192,6 +192,21 @@ public class Generator :
                 static partial class ProjectFiles
                 {
             """);
+
+        // Generate root-level file properties
+        foreach (var filePath in rootFiles.OrderBy(_ => _))
+        {
+            var fileName = Path.GetFileName(filePath);
+            var propertyName = ToFilePropertyName(fileName);
+            var path = PathToCSharpString(filePath);
+
+            builder.AppendLine($$"""        public static ProjectFile {{propertyName}} { get; } = new({{path}});""");
+        }
+
+        if (rootFiles.Count > 0 && tree.Count > 0)
+        {
+            builder.AppendLine();
+        }
 
         GenerateRootProperties(builder, tree);
 
@@ -299,17 +314,19 @@ public class Generator :
         return propertyName;
     }
 
-    static List<FileTreeNode> BuildFileTree(ImmutableArray<string> files)
+    static (List<FileTreeNode> Directories, List<string> RootFiles) BuildFileTree(ImmutableArray<string> files)
     {
         var topLevelDirectories = new Dictionary<string, FileTreeNode>();
+        var rootFiles = new List<string>();
 
         foreach (var file in files)
         {
             var parts = file.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-            // Skip files without a directory (root-level files)
+            // Handle files at the root of the project
             if (parts.Length < 2)
             {
+                rootFiles.Add(file);
                 continue;
             }
 
@@ -349,7 +366,7 @@ public class Generator :
             current.Files.Add(file);
         }
 
-        return topLevelDirectories.Values.ToList();
+        return (topLevelDirectories.Values.ToList(), rootFiles);
     }
 
 

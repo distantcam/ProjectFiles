@@ -8,6 +8,13 @@ public class ComsumeTests
         IsTrue(File.Exists(ProjectFiles.RecursiveDirectory.SomeFile_txt));
 
     [Test]
+    public void AtRoot()
+    {
+        IsTrue(File.Exists(ProjectFiles.fileAtRoot_txt));
+        IsTrue(File.Exists(ProjectFiles.globFileAtRoot_txt));
+    }
+
+    [Test]
     public void Specific()
     {
         IsTrue(File.Exists(ProjectFiles.SpecificDirectory.Dir1.File1_txt));
