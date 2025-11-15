@@ -4,8 +4,8 @@
 public class Generator :
     IIncrementalGenerator
 {
-    static string projectFileContent;
-    static string projectDirectoryContent;
+    static SourceText projectFileContent;
+    static SourceText projectDirectoryContent;
 
     // static readonly DiagnosticDescriptor LogWarning = new(
     //     id: "PFSG001",
@@ -17,16 +17,16 @@ public class Generator :
 
     static Generator()
     {
-        projectFileContent  = ReadResouce("ProjectFile");
-        projectDirectoryContent  = ReadResouce("ProjectDirectory");
+        projectFileContent = ReadResouce("ProjectFile");
+        projectDirectoryContent = ReadResouce("ProjectDirectory");
     }
 
-    static string ReadResouce(string name)
+    static SourceText ReadResouce(string name)
     {
         var assembly = typeof(Generator).Assembly;
         using var stream = assembly.GetManifestResourceStream($"ProjectFiles.{name}.cs")!;
         using var reader = new StreamReader(stream);
-        return reader.ReadToEnd();
+        return SourceText.From(reader.ReadToEnd(), Encoding.UTF8);
     }
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -56,8 +56,8 @@ public class Generator :
             //spc.ReportDiagnostic(Diagnostic.Create(LogWarning, Location.None, "AAA"));
             var source = GenerateSource(files);
             spc.AddSource("ProjectFiles.g.cs", SourceText.From(source, Encoding.UTF8));
-            spc.AddSource("ProjectFiles.ProjectDirectory.g.cs", SourceText.From(projectDirectoryContent, Encoding.UTF8));
-            spc.AddSource("ProjectFiles.ProjectFile.g.cs", SourceText.From(projectFileContent, Encoding.UTF8));
+            spc.AddSource("ProjectFiles.ProjectDirectory.g.cs", projectDirectoryContent);
+            spc.AddSource("ProjectFiles.ProjectFile.g.cs", projectFileContent);
         });
     }
 
