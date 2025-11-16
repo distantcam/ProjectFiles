@@ -4,6 +4,7 @@ global using System.Runtime.CompilerServices;
 global using System.Text;
 global using Microsoft.CodeAnalysis;
 global using Microsoft.CodeAnalysis.CSharp;
+global using Microsoft.CodeAnalysis.Diagnostics;
 global using Microsoft.CodeAnalysis.Text;
 global using NUnit.Framework;
 global using VerifyTests;

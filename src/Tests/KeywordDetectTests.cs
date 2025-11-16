@@ -1,4 +1,3 @@
-namespace ProjectFiles.Tests;
 
 [TestFixture]
 public class KeywordDetectTests

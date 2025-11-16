@@ -1,7 +1,3 @@
-using Microsoft.CodeAnalysis.Diagnostics;
-
-namespace ProjectFiles.Tests;
-
 [TestFixture]
 public class GeneratorTest
 {
@@ -24,12 +20,12 @@ public class GeneratorTest
             CreateAdditionalText("file2.json", "content")
         };
 
-        var optionsProvider = new MockAnalyzerConfigOptionsProvider([]);
+        var options = new MockOptionsProvider([]);
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(additionalFiles)
-            .WithUpdatedAnalyzerConfigOptions(optionsProvider)
+            .AddAdditionalText(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
             .RunGenerators(CreateCompilation());
 
         return Verify(driver);
@@ -51,12 +47,12 @@ public class GeneratorTest
             }
         };
 
-        var optionsProvider = new MockAnalyzerConfigOptionsProvider(metadata);
+        var options = new MockOptionsProvider(metadata);
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(additionalFiles)
-            .WithUpdatedAnalyzerConfigOptions(optionsProvider)
+            .AddAdditionalText(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
             .RunGenerators(CreateCompilation());
 
         return Verify(driver);
@@ -88,12 +84,12 @@ public class GeneratorTest
             }
         };
 
-        var optionsProvider = new MockAnalyzerConfigOptionsProvider(metadata);
+        var options = new MockOptionsProvider(metadata);
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(additionalFiles)
-            .WithUpdatedAnalyzerConfigOptions(optionsProvider)
+            .AddAdditionalText(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
             .RunGenerators(CreateCompilation());
 
         return Verify(driver);
@@ -120,12 +116,12 @@ public class GeneratorTest
             }
         };
 
-        var optionsProvider = new MockAnalyzerConfigOptionsProvider(metadata);
+        var options = new MockOptionsProvider(metadata);
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(additionalFiles)
-            .WithUpdatedAnalyzerConfigOptions(optionsProvider)
+            .AddAdditionalText(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
             .RunGenerators(CreateCompilation());
 
         return Verify(driver);
@@ -162,12 +158,12 @@ public class GeneratorTest
             }
         };
 
-        var optionsProvider = new MockAnalyzerConfigOptionsProvider(metadata);
+        var options = new MockOptionsProvider(metadata);
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(additionalFiles)
-            .WithUpdatedAnalyzerConfigOptions(optionsProvider)
+            .AddAdditionalText(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
             .RunGenerators(CreateCompilation());
 
         return Verify(driver);
@@ -199,12 +195,12 @@ public class GeneratorTest
             }
         };
 
-        var optionsProvider = new MockAnalyzerConfigOptionsProvider(metadata);
+        var options = new MockOptionsProvider(metadata);
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(additionalFiles)
-            .WithUpdatedAnalyzerConfigOptions(optionsProvider)
+            .AddAdditionalText(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
             .RunGenerators(CreateCompilation());
 
         return Verify(driver);
@@ -236,12 +232,12 @@ public class GeneratorTest
             }
         };
 
-        var optionsProvider = new MockAnalyzerConfigOptionsProvider(metadata);
+        var options = new MockOptionsProvider(metadata);
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(additionalFiles)
-            .WithUpdatedAnalyzerConfigOptions(optionsProvider)
+            .AddAdditionalText(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
             .RunGenerators(CreateCompilation());
 
         return Verify(driver);
@@ -273,12 +269,12 @@ public class GeneratorTest
             }
         };
 
-        var optionsProvider = new MockAnalyzerConfigOptionsProvider(metadata);
+        var options = new MockOptionsProvider(metadata);
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(additionalFiles)
-            .WithUpdatedAnalyzerConfigOptions(optionsProvider)
+            .AddAdditionalText(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
             .RunGenerators(CreateCompilation());
 
         return Verify(driver);
@@ -310,12 +306,12 @@ public class GeneratorTest
             }
         };
 
-        var optionsProvider = new MockAnalyzerConfigOptionsProvider(metadata);
+        var options = new MockOptionsProvider(metadata);
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(additionalFiles)
-            .WithUpdatedAnalyzerConfigOptions(optionsProvider)
+            .AddAdditionalText(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
             .RunGenerators(CreateCompilation());
 
         return Verify(driver);
@@ -357,12 +353,12 @@ public class GeneratorTest
             }
         };
 
-        var optionsProvider = new MockAnalyzerConfigOptionsProvider(metadata);
+        var options = new MockOptionsProvider(metadata);
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(additionalFiles)
-            .WithUpdatedAnalyzerConfigOptions(optionsProvider)
+            .AddAdditionalText(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
             .RunGenerators(CreateCompilation());
 
         return Verify(driver);
@@ -392,12 +388,12 @@ public class GeneratorTest
             }
         };
 
-        var optionsProvider = new MockAnalyzerConfigOptionsProvider(metadata);
+        var options = new MockOptionsProvider(metadata);
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(additionalFiles)
-            .WithUpdatedAnalyzerConfigOptions(optionsProvider)
+            .AddAdditionalText(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
             .RunGenerators(CreateCompilation());
 
         return Verify(driver);
@@ -421,13 +417,13 @@ public class GeneratorTest
             SourceText.From(text, Encoding.UTF8);
     }
 
-    class MockAnalyzerConfigOptionsProvider(
+    class MockOptionsProvider(
         Dictionary<string, Dictionary<string, string>> fileMetadata) : AnalyzerConfigOptionsProvider
     {
-        public override AnalyzerConfigOptions GlobalOptions { get; } = new MockAnalyzerConfigOptions(new());
+        public override AnalyzerConfigOptions GlobalOptions { get; } = new MockOptions(new());
 
         public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) =>
-            new MockAnalyzerConfigOptions(new());
+            new MockOptions(new());
 
         public override AnalyzerConfigOptions GetOptions(AdditionalText textFile)
         {
@@ -435,11 +431,11 @@ public class GeneratorTest
                 ? metadata
                 : new Dictionary<string, string>();
 
-            return new MockAnalyzerConfigOptions(options);
+            return new MockOptions(options);
         }
     }
 
-    class MockAnalyzerConfigOptions(Dictionary<string, string> options) : AnalyzerConfigOptions
+    class MockOptions(Dictionary<string, string> options) : AnalyzerConfigOptions
     {
         public override bool TryGetValue(string key, [NotNullWhen(true)] out string? value) =>
             options.TryGetValue(key, out value);
