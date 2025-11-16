@@ -33,28 +33,43 @@ public class Generator :
     {
         // Get all additional files that are .csproj files
         var projectFiles = context.AdditionalTextsProvider
-            .Where(_ => _.Path.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase));
+            .Where(_ => _.Path.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+            .Collect();
 
-        // Parse the project file and extract file paths
-        var filePaths = projectFiles
-            .Select((file, cancel) =>
+        // Get all additional files with CopyToOutputDirectory metadata
+        var copyLocalFiles = context.AdditionalTextsProvider
+            .Combine(context.AnalyzerConfigOptionsProvider)
+            .Select((pair, _) =>
             {
-                var text = file.GetText(cancel);
-                if (text == null)
+                var (additionalText, configOptions) = pair;
+
+                // Skip the .csproj file itself
+                if (additionalText.Path.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
                 {
-                    return ImmutableArray<string>.Empty;
+                    return null;
                 }
 
-                var projectDir = Path.GetDirectoryName(file.Path)!;
-                return ParseProjectFile(text.ToString(), projectDir);
+                var options = configOptions.GetOptions(additionalText);
+                if (options.TryGetValue("build_metadata.AdditionalFiles.ProjectFilesGenerator", out var relativePath))
+                {
+                    return relativePath;
+                }
+
+                return null;
             })
-            .Where(_ => _.Length > 0);
+            .Where(path => path is not null)
+            .Select((path, _) => path!)
+            .Collect();
+
+        var files = projectFiles.Combine(copyLocalFiles);
+
 
         // Generate the source
-        context.RegisterSourceOutput(filePaths, (spc, files) =>
+        context.RegisterSourceOutput(files, (spc, files) =>
         {
+            var (_, copyLocalFiles) = files;
             //spc.ReportDiagnostic(Diagnostic.Create(LogWarning, Location.None, "AAA"));
-            var source = GenerateSource(files);
+            var source = GenerateSource(copyLocalFiles);
             spc.AddSource("ProjectFiles.g.cs", SourceText.From(source, Encoding.UTF8));
             spc.AddSource("ProjectFiles.ProjectDirectory.g.cs", projectDirectoryContent);
             spc.AddSource("ProjectFiles.ProjectFile.g.cs", projectFileContent);
