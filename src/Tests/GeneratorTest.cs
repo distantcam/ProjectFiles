@@ -24,11 +24,11 @@ public class GeneratorTest
             CreateAdditionalText("file2.json", "content")
         };
 
-        var optionsProvider = new MockAnalyzerConfigOptionsProvider(new Dictionary<string, Dictionary<string, string>>());
+        var optionsProvider = new MockAnalyzerConfigOptionsProvider([]);
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(ImmutableArray.Create(additionalFiles))
+            .AddAdditionalTexts(additionalFiles)
             .WithUpdatedAnalyzerConfigOptions(optionsProvider)
             .RunGenerators(CreateCompilation());
 
@@ -55,7 +55,7 @@ public class GeneratorTest
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(ImmutableArray.Create(additionalFiles))
+            .AddAdditionalTexts(additionalFiles)
             .WithUpdatedAnalyzerConfigOptions(optionsProvider)
             .RunGenerators(CreateCompilation());
 
@@ -92,7 +92,7 @@ public class GeneratorTest
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts([..additionalFiles])
+            .AddAdditionalTexts(additionalFiles)
             .WithUpdatedAnalyzerConfigOptions(optionsProvider)
             .RunGenerators(CreateCompilation());
 
@@ -124,7 +124,7 @@ public class GeneratorTest
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts([..additionalFiles])
+            .AddAdditionalTexts(additionalFiles)
             .WithUpdatedAnalyzerConfigOptions(optionsProvider)
             .RunGenerators(CreateCompilation());
 
@@ -166,7 +166,7 @@ public class GeneratorTest
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts([..additionalFiles])
+            .AddAdditionalTexts(additionalFiles)
             .WithUpdatedAnalyzerConfigOptions(optionsProvider)
             .RunGenerators(CreateCompilation());
 
@@ -203,7 +203,7 @@ public class GeneratorTest
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts([..additionalFiles])
+            .AddAdditionalTexts(additionalFiles)
             .WithUpdatedAnalyzerConfigOptions(optionsProvider)
             .RunGenerators(CreateCompilation());
 
@@ -240,7 +240,7 @@ public class GeneratorTest
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts([..additionalFiles])
+            .AddAdditionalTexts(additionalFiles)
             .WithUpdatedAnalyzerConfigOptions(optionsProvider)
             .RunGenerators(CreateCompilation());
 
@@ -277,7 +277,7 @@ public class GeneratorTest
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts([..additionalFiles])
+            .AddAdditionalTexts(additionalFiles)
             .WithUpdatedAnalyzerConfigOptions(optionsProvider)
             .RunGenerators(CreateCompilation());
 
@@ -314,7 +314,7 @@ public class GeneratorTest
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts([..additionalFiles])
+            .AddAdditionalTexts(additionalFiles)
             .WithUpdatedAnalyzerConfigOptions(optionsProvider)
             .RunGenerators(CreateCompilation());
 
@@ -361,7 +361,7 @@ public class GeneratorTest
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts(ImmutableArray.Create(additionalFiles))
+            .AddAdditionalTexts(additionalFiles)
             .WithUpdatedAnalyzerConfigOptions(optionsProvider)
             .RunGenerators(CreateCompilation());
 
@@ -396,7 +396,7 @@ public class GeneratorTest
 
         var driver = CSharpGeneratorDriver
             .Create(new Generator())
-            .AddAdditionalTexts([..additionalFiles])
+            .AddAdditionalTexts(additionalFiles)
             .WithUpdatedAnalyzerConfigOptions(optionsProvider)
             .RunGenerators(CreateCompilation());
 
@@ -411,7 +411,7 @@ public class GeneratorTest
             "TestAssembly",
             [],
             [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            new(OutputKind.DynamicallyLinkedLibrary));
 
     class MockAdditionalText(string path, string text) : AdditionalText
     {
