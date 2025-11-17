@@ -408,36 +408,4 @@ public class GeneratorTest
             [],
             [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
             new(OutputKind.DynamicallyLinkedLibrary));
-
-    class MockAdditionalText(string path, string text) : AdditionalText
-    {
-        public override string Path { get; } = path;
-
-        public override SourceText GetText(Cancel cancel = default) =>
-            SourceText.From(text, Encoding.UTF8);
-    }
-
-    class MockOptionsProvider(
-        Dictionary<string, Dictionary<string, string>> fileMetadata) : AnalyzerConfigOptionsProvider
-    {
-        public override AnalyzerConfigOptions GlobalOptions { get; } = new MockOptions(new());
-
-        public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) =>
-            new MockOptions(new());
-
-        public override AnalyzerConfigOptions GetOptions(AdditionalText textFile)
-        {
-            var options = fileMetadata.TryGetValue(textFile.Path, out var metadata)
-                ? metadata
-                : new Dictionary<string, string>();
-
-            return new MockOptions(options);
-        }
-    }
-
-    class MockOptions(Dictionary<string, string> options) : AnalyzerConfigOptions
-    {
-        public override bool TryGetValue(string key, [NotNullWhen(true)] out string? value) =>
-            options.TryGetValue(key, out value);
-    }
 }

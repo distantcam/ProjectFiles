@@ -21,9 +21,10 @@ public class Generator :
         projectDirectoryContent = ReadResouce("ProjectDirectory");
     }
 
+    static Assembly assembly = typeof(Generator).Assembly;
+
     static SourceText ReadResouce(string name)
     {
-        var assembly = typeof(Generator).Assembly;
         using var stream = assembly.GetManifestResourceStream($"ProjectFiles.{name}.cs")!;
         using var reader = new StreamReader(stream);
         return SourceText.From(reader.ReadToEnd(), Encoding.UTF8);
@@ -34,7 +35,7 @@ public class Generator :
         // Get all additional files with CopyToOutputDirectory metadata
         var files = context.AdditionalTextsProvider
             .Combine(context.AnalyzerConfigOptionsProvider)
-            .Select((pair, _) =>
+            .Select(pair =>
             {
                 var (additionalText, configOptions) = pair;
 
@@ -47,7 +48,7 @@ public class Generator :
                 return null;
             })
             .Where(_ => !string.IsNullOrWhiteSpace(_))
-            .Select((path, _) => path!)
+            .Select(_ => _!)
             .Collect();
 
         // Generate the source
@@ -80,7 +81,6 @@ public class Generator :
                 {
             """);
 
-
         // Generate root-level file properties
         foreach (var filePath in rootFiles.OrderBy(_ => _))
         {
@@ -92,7 +92,8 @@ public class Generator :
             builder.AppendLine($$"""        public static ProjectFile {{propertyName}} { get; } = new({{path}});""");
         }
 
-        if (rootFiles.Count > 0 && tree.Count > 0)
+        if (rootFiles.Count > 0 &&
+            tree.Count > 0)
         {
             builder.AppendLine();
         }
