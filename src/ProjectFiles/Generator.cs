@@ -51,19 +51,19 @@ public class Generator :
             .Collect();
 
         // Generate the source
-        context.RegisterSourceOutput(files, (spc, files) =>
+        context.RegisterSourceOutput(files, (context, files) =>
         {
             //spc.ReportDiagnostic(Diagnostic.Create(LogWarning, Location.None, "AAA"));
-            var source = GenerateSource(files);
-            spc.AddSource("ProjectFiles.g.cs", SourceText.From(source, Encoding.UTF8));
-            spc.AddSource("ProjectFiles.ProjectDirectory.g.cs", projectDirectoryContent);
-            spc.AddSource("ProjectFiles.ProjectFile.g.cs", projectFileContent);
+            var source = GenerateSource(files, context.CancellationToken);
+            context.AddSource("ProjectFiles.g.cs", SourceText.From(source, Encoding.UTF8));
+            context.AddSource("ProjectFiles.ProjectDirectory.g.cs", projectDirectoryContent);
+            context.AddSource("ProjectFiles.ProjectFile.g.cs", projectFileContent);
         });
     }
 
-    static string GenerateSource(ImmutableArray<string> files)
+    static string GenerateSource(ImmutableArray<string> files, Cancel cancel)
     {
-        var (tree, rootFiles) = BuildFileTree(files);
+        var (tree, rootFiles) = BuildFileTree(files, cancel);
         var builder = new StringBuilder();
 
         builder.AppendLine(
@@ -80,9 +80,11 @@ public class Generator :
                 {
             """);
 
+
         // Generate root-level file properties
         foreach (var filePath in rootFiles.OrderBy(_ => _))
         {
+            cancel.ThrowIfCancellationRequested();
             var fileName = Path.GetFileName(filePath);
             var propertyName = ToFilePropertyName(fileName);
             var path = PathToCSharpString(filePath);
@@ -95,7 +97,7 @@ public class Generator :
             builder.AppendLine();
         }
 
-        GenerateRootProperties(builder, tree);
+        GenerateRootProperties(builder, tree, cancel);
 
         builder.AppendLine(
             """
@@ -106,28 +108,32 @@ public class Generator :
             {
             """);
 
-        GenerateTypeDefinitions(builder, tree, 0);
+        GenerateTypeDefinitions(builder, tree, 0, cancel);
 
         builder.AppendLine("}");
 
         return builder.ToString();
     }
 
-    static void GenerateRootProperties(StringBuilder builder, List<DirectoryNode> topLevelNodes)
+    static void GenerateRootProperties(StringBuilder builder, List<DirectoryNode> topLevelNodes, Cancel cancel)
     {
         foreach (var node in topLevelNodes.OrderBy(_ => _.Path))
         {
+            cancel.ThrowIfCancellationRequested();
+
             var className = Identifier.Build(Path.GetFileName(node.Path));
             builder.AppendLine($"        public static {className}Type {className} {{ get; }} = new();");
         }
     }
 
-    static void GenerateTypeDefinitions(StringBuilder builder, List<DirectoryNode> topLevelNodes, int indentCount)
+    static void GenerateTypeDefinitions(StringBuilder builder, List<DirectoryNode> topLevelNodes, int indentCount, Cancel cancel)
     {
         var indent = new string(' ', indentCount * 4);
 
         foreach (var node in topLevelNodes.OrderBy(_ => _.Path))
         {
+            cancel.ThrowIfCancellationRequested();
+
             var className = Identifier.Build(Path.GetFileName(node.Path));
             var pathString = PathToCSharpString(node.Path);
             builder.AppendLine(
@@ -137,19 +143,21 @@ public class Generator :
                   """);
 
             // Generate file properties and subdirectory properties
-            GenerateDirectoryMembers(builder, node, indentCount + 1);
+            GenerateDirectoryMembers(builder, node, indentCount + 1, cancel);
 
             builder.AppendLine($"{indent}}}");
         }
     }
 
-    static void GenerateDirectoryMembers(StringBuilder builder, DirectoryNode node, int indentCount)
+    static void GenerateDirectoryMembers(StringBuilder builder, DirectoryNode node, int indentCount, Cancel cancel)
     {
         var indent = new string(' ', indentCount * 4);
 
         // Generate subdirectory properties first
         foreach (var (name, childNode) in node.Directories.OrderBy(_ => _.Key))
         {
+            cancel.ThrowIfCancellationRequested();
+
             var className = Identifier.Build(name);
             // generate subdirectory property
             builder.AppendLine($"{indent}public {className}Type {className} {{ get; }} = new();");
@@ -161,7 +169,7 @@ public class Generator :
                   {{indent}}{
                   """);
 
-            GenerateDirectoryMembers(builder, childNode, indentCount + 1);
+            GenerateDirectoryMembers(builder, childNode, indentCount + 1, cancel);
 
             builder.AppendLine($"{indent}}}");
             builder.AppendLine();
@@ -201,13 +209,15 @@ public class Generator :
         return propertyName;
     }
 
-    static (List<DirectoryNode> Directories, List<string> RootFiles) BuildFileTree(ImmutableArray<string> files)
+    static (List<DirectoryNode> Directories, List<string> RootFiles) BuildFileTree(ImmutableArray<string> files, Cancel cancel)
     {
         var topLevelDirectories = new Dictionary<string, DirectoryNode>();
         var rootFiles = new List<string>();
 
         foreach (var file in files)
         {
+            cancel.ThrowIfCancellationRequested();
+
             var parts = file.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
             // Handle files at the root of the project
@@ -234,6 +244,7 @@ public class Generator :
             // Navigate through middle directories
             for (var i = 1; i < parts.Length - 1; i++)
             {
+                cancel.ThrowIfCancellationRequested();
                 var part = parts[i];
                 currentPath = currentPath + Path.DirectorySeparatorChar + part;
 
