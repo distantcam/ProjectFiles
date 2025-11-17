@@ -239,6 +239,7 @@ The generator follows these rules when converting file and directory names to C#
 
 The generator supports standard glob patterns:
 
+
 ### Wildcards
 
 ```xml
@@ -269,7 +270,7 @@ The generator supports standard glob patterns:
 
 ## Base Classes
 
-These base classes can be extened with additional functionality by creating partial class definitions.
+Directory and File level items types.
 
 
 ### `ProjectDirectory`
@@ -329,7 +330,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 partial class ProjectFile(string path)
 {
     public string Path { get; } = path;
@@ -354,6 +354,8 @@ partial class ProjectFile(string path)
     public string ReadAllText(Encoding encoding) =>
         File.ReadAllText(Path, encoding);
 
+    public FileInfo Info => new(Path);
+
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_0_OR_GREATER
     public Task<string> ReadAllTextAsync(CancellationToken cancel = default) =>
         File.ReadAllTextAsync(Path, cancel);
@@ -367,23 +369,50 @@ partial class ProjectFile(string path)
     public Task<string> ReadAllTextAsync(Encoding encoding, CancellationToken cancel = default) =>
         Task.FromResult(File.ReadAllText(Path, encoding));
 #endif
-    public FileInfo Info => new(Path);
 }
 ```
 <sup><a href='/src/Templates/ProjectFile.cs#L1-L47' title='Snippet source file'>snippet source</a> | <a href='#snippet-ProjectFile.cs' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
+### Extending base class
+
+These base classes can be extended with additional functionality by creating partial class definitions.
+
+<!-- snippet: ExtendPartialTests.cs -->
+<a id='snippet-ExtendPartialTests.cs'></a>
+```cs
+namespace ProjectFilesGenerator;
+
+abstract partial class ProjectDirectory
+{
+    /// <summary>
+    /// Recursively enumerates all files in this directory and subdirectories.
+    /// </summary>
+    public IEnumerable<string> EnumerateFilesRecursively(string searchPattern = "*") =>
+        Directory.EnumerateFiles(Path, searchPattern, SearchOption.AllDirectories);
+
+    /// <summary>
+    /// Combines this directory path with additional path segments.
+    /// </summary>
+    public string Combine(params string[] paths) =>
+        System.IO.Path.Combine([Path, .. paths]);
+}
+```
+<sup><a href='/src/NugetTests/ExtendPartialTests.cs#L1-L16' title='Snippet source file'>snippet source</a> | <a href='#snippet-ExtendPartialTests.cs' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+
 ## Troubleshooting
+
 
 ### Files Not Appearing
 
 1. **Verify `CopyToOutputDirectory` is set**: Only files with `PreserveNewest` or `Always` are included
-2. **Check `.csproj` is in AdditionalFiles**: The generator needs access to the project file
-3. **Rebuild the project**: Sometimes the generator needs a clean rebuild to detect changes
+1. **Rebuild the project**: Sometimes the generator needs a clean rebuild to detect changes
 
 
-### Path Separators
+## Path Separators
 
 The generator normalizes all paths to use forward slashes (`/`) in the generated code, regardless of the platform. This ensures consistent behavior across Windows, Linux, and macOS.
 

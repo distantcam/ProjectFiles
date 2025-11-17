@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 partial class ProjectFile(string path)
 {
     public string Path { get; } = path;
@@ -31,6 +30,8 @@ partial class ProjectFile(string path)
     public string ReadAllText(Encoding encoding) =>
         File.ReadAllText(Path, encoding);
 
+    public FileInfo Info => new(Path);
+
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_0_OR_GREATER
     public Task<string> ReadAllTextAsync(CancellationToken cancel = default) =>
         File.ReadAllTextAsync(Path, cancel);
@@ -44,5 +45,4 @@ partial class ProjectFile(string path)
     public Task<string> ReadAllTextAsync(Encoding encoding, CancellationToken cancel = default) =>
         Task.FromResult(File.ReadAllText(Path, encoding));
 #endif
-    public FileInfo Info => new(Path);
 }
