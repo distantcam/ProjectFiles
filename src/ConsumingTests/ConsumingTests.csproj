@@ -11,12 +11,9 @@
                       ReferenceOutputAssembly="false" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter" />
-    <PackageReference Include="Verify.NUnit" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="Polyfill" PrivateAssets="all" />
     <Using Include="NUnit.Framework.Legacy.ClassicAssert" Static="True" />
   </ItemGroup>
-
 
   <!-- Example files to copy to output -->
   <ItemGroup>
