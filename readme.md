@@ -76,6 +76,7 @@ public class ComsumeTests
     }
 ```
 
+
 ## Generated Code Structure
 
 The generator creates three files:
