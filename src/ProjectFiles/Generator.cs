@@ -160,8 +160,7 @@ public class Generator : IIncrementalGenerator
         foreach (var filePath in rootFiles.OrderBy(_ => _))
         {
             cancel.ThrowIfCancellationRequested();
-            var fileName = Path.GetFileName(filePath);
-            var propertyName = ToFilePropertyName(fileName);
+            var propertyName = ToFilePropertyName(filePath);
             var path = PathToCSharpString(filePath);
 
             builder.AppendLine($$"""        public static ProjectFile {{propertyName}} { get; } = new({{path}});""");
@@ -287,8 +286,7 @@ public class Generator : IIncrementalGenerator
         // Generate file properties
         foreach (var filePath in node.Files.OrderBy(_ => _))
         {
-            var fileName = Path.GetFileName(filePath);
-            var propertyName = ToFilePropertyName(fileName);
+            var propertyName = ToFilePropertyName(filePath);
             var path = PathToCSharpString(filePath);
 
             builder.AppendLine($$"""{{indent}}public ProjectFile {{propertyName}} { get; } = new({{path}});""");
@@ -301,10 +299,10 @@ public class Generator : IIncrementalGenerator
         return $"\"{path}\"";
     }
 
-    static string ToFilePropertyName(string fileName)
+    static string ToFilePropertyName(string filePath)
     {
-        var nameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
-        var extension = Path.GetExtension(fileName);
+        var nameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
+        var extension = Path.GetExtension(filePath);
 
         var propertyName = Identifier.Build(nameWithoutExtension);
 
