@@ -24,18 +24,20 @@ public class Generator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Get MSBuild properties
-        var msbuildProperties = context.AnalyzerConfigOptionsProvider
+        var msbuildProperties = context
+            .AnalyzerConfigOptionsProvider
             .Select((provider, _) =>
             {
-                provider.GlobalOptions.TryGetValue("build_property.MSBuildProjectDirectory", out var projectDir);
-                provider.GlobalOptions.TryGetValue("build_property.MSBuildProjectFullPath", out var projectFile);
-                provider.GlobalOptions.TryGetValue("build_property.SolutionDir", out var solutionDir);
-                provider.GlobalOptions.TryGetValue("build_property.SolutionPath", out var solutionFile);
+                var options = provider.GlobalOptions;
+                options.TryGetValue("build_property.MSBuildProjectDirectory", out var projectDirectpry);
+                options.TryGetValue("build_property.MSBuildProjectFullPath", out var projectFile);
+                options.TryGetValue("build_property.SolutionDir", out var solutionDirectory);
+                options.TryGetValue("build_property.SolutionPath", out var solutionFile);
 
                 return new MsBuildProperties(
-                    projectDir,
+                    projectDirectpry,
                     projectFile,
-                    solutionDir,
+                    solutionDirectory,
                     solutionFile
                 );
             });
@@ -151,7 +153,8 @@ public class Generator : IIncrementalGenerator
         // Generate default properties
         GenerateDefaultProperties(builder, properties);
 
-        if ((rootFiles.Count > 0 || tree.Count > 0) && HasAnyDefaultProperty(properties))
+        if ((rootFiles.Count > 0 || tree.Count > 0) &&
+            HasAnyDefaultProperty(properties))
         {
             builder.AppendLine();
         }
