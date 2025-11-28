@@ -1,5 +1,3 @@
-using Microsoft.CodeAnalysis.CSharp;
-
 public static class KeywordDetect
 {
     public static string Sanitize(StringBuilder builder)
@@ -9,6 +7,7 @@ public static class KeywordDetect
         {
             return string.Concat("@", result);
         }
+
         return result;
     }
 }

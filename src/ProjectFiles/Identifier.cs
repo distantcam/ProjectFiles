@@ -2,7 +2,7 @@ public static class Identifier
 {
     public static string Build(string name)
     {
-        var builder = new StringBuilder();
+        var builder = new StringBuilder(name.Length + 1);
         var first = name[0];
         if (char.IsLetter(first) || first == '_')
         {

@@ -253,7 +253,6 @@ public class Generator : IIncrementalGenerator
                   {{indent}}{
                   """);
 
-            // Generate file properties and subdirectory properties
             GenerateDirectoryMembers(builder, node, indentCount + 1, cancel);
 
             builder.AppendLine($"{indent}}}");
@@ -298,7 +297,7 @@ public class Generator : IIncrementalGenerator
 
     static string PathToCSharpString(string filePath)
     {
-        var path = filePath.Replace("\\", "/");
+        var path = filePath.Replace('\\', '/');
         return $"\"{path}\"";
     }
 
