@@ -69,40 +69,42 @@ public class Generator : IIncrementalGenerator
         var combined = files.Combine(msbuildProperties);
 
         // Generate the source
-        context.RegisterSourceOutput(combined, (context, data) =>
-        {
-            var (fileList, props) = data;
-
-            // Check for conflicts and report diagnostics
-            var conflicts = FindReservedNameConflicts(fileList);
-            var conflictingFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var (file, property, isDirectory) in conflicts)
+        context.RegisterSourceOutput(
+            combined,
+            (context, data) =>
             {
-                conflictingFiles.Add(file);
-                var descriptor = isDirectory ? reservedDirectoryNameConflict : reservedFileNameConflict;
-                var diagnostic = Diagnostic.Create(
-                    descriptor,
-                    Location.None,
-                    file,
-                    property);
-                context.ReportDiagnostic(diagnostic);
-            }
+                var (fileList, props) = data;
 
-            // Filter out conflicting files before generating source
-            var filteredFiles = fileList.Where(f => !conflictingFiles.Contains(f)).ToImmutableArray();
+                // Check for conflicts and report diagnostics
+                var conflicts = FindReservedNameConflicts(fileList);
+                var conflictingFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            var source = GenerateSource(filteredFiles, props, context.CancellationToken);
-            context.AddSource("ProjectFiles.g.cs", SourceText.From(source, Encoding.UTF8));
-            context.AddSource("ProjectFiles.ProjectDirectory.g.cs", projectDirectoryContent);
-            context.AddSource("ProjectFiles.ProjectFile.g.cs", projectFileContent);
+                foreach (var (file, property, isDirectory) in conflicts)
+                {
+                    conflictingFiles.Add(file);
+                    var descriptor = isDirectory ? reservedDirectoryNameConflict : reservedFileNameConflict;
+                    var diagnostic = Diagnostic.Create(
+                        descriptor,
+                        Location.None,
+                        file,
+                        property);
+                    context.ReportDiagnostic(diagnostic);
+                }
 
-            // Generate global using if ImplicitUsings is enabled
-            if (props.ImplicitUsingsEnabled)
-            {
-                context.AddSource("ProjectFiles.GlobalUsings.g.cs", globalUsing);
-            }
-        });
+                // Filter out conflicting files before generating source
+                var filteredFiles = fileList.Where(f => !conflictingFiles.Contains(f)).ToImmutableArray();
+
+                var source = GenerateSource(filteredFiles, props, context.CancellationToken);
+                context.AddSource("ProjectFiles.g.cs", SourceText.From(source, Encoding.UTF8));
+                context.AddSource("ProjectFiles.ProjectDirectory.g.cs", projectDirectoryContent);
+                context.AddSource("ProjectFiles.ProjectFile.g.cs", projectFileContent);
+
+                // Generate global using if ImplicitUsings is enabled
+                if (props.ImplicitUsingsEnabled)
+                {
+                    context.AddSource("ProjectFiles.GlobalUsings.g.cs", globalUsing);
+                }
+            });
     }
 
     static HashSet<string> reservedNames = new(StringComparer.OrdinalIgnoreCase)
