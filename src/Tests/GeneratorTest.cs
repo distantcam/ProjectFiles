@@ -935,6 +935,224 @@ public class GeneratorTest
         return Verify(driver);
     }
 
+    [Test]
+    public Task ImplicitUsingsEnabled()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("config.json", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["config.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "config.json"
+            }
+        };
+
+        var globalOptions = new Dictionary<string, string>
+        {
+            ["build_property.ImplicitUsings"] = "enable"
+        };
+
+        var options = new MockOptionsProvider(metadata, globalOptions);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ImplicitUsingsTrue()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("appsettings.json", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["appsettings.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "appsettings.json"
+            }
+        };
+
+        var globalOptions = new Dictionary<string, string>
+        {
+            ["build_property.ImplicitUsings"] = "true"
+        };
+
+        var options = new MockOptionsProvider(metadata, globalOptions);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ImplicitUsingsDisabled()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("config.json", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["config.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "config.json"
+            }
+        };
+
+        var globalOptions = new Dictionary<string, string>
+        {
+            ["build_property.ImplicitUsings"] = "disable"
+        };
+
+        var options = new MockOptionsProvider(metadata, globalOptions);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ImplicitUsingsFalse()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("readme.md", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["readme.md"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "readme.md"
+            }
+        };
+
+        var globalOptions = new Dictionary<string, string>
+        {
+            ["build_property.ImplicitUsings"] = "false"
+        };
+
+        var options = new MockOptionsProvider(metadata, globalOptions);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ImplicitUsingsNotSet()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("data.xml", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["data.xml"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "data.xml"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ImplicitUsingsWithMsBuildProperties()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("appsettings.json", "content"),
+            CreateAdditionalText("Config/database.json", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["appsettings.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "appsettings.json"
+            },
+            ["Config/database.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Config/database.json"
+            }
+        };
+
+        var globalOptions = new Dictionary<string, string>
+        {
+            ["build_property.MSBuildProjectDirectory"] = "C:/Projects/MyApp",
+            ["build_property.MSBuildProjectFullPath"] = "C:/Projects/MyApp/MyApp.csproj",
+            ["build_property.SolutionDir"] = "C:/Projects/",
+            ["build_property.SolutionPath"] = "C:/Projects/MySolution.sln",
+            ["build_property.ImplicitUsings"] = "enable"
+        };
+
+        var options = new MockOptionsProvider(metadata, globalOptions);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ImplicitUsingsNoFiles()
+    {
+        var additionalFiles = Array.Empty<AdditionalText>();
+
+        var globalOptions = new Dictionary<string, string>
+        {
+            ["build_property.MSBuildProjectDirectory"] = "C:/Dev/WebApi",
+            ["build_property.ImplicitUsings"] = "enable"
+        };
+
+        var options = new MockOptionsProvider([], globalOptions);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
     static AdditionalText CreateAdditionalText(string path, string content) =>
         new MockAdditionalText(path, content);
 

@@ -5,6 +5,7 @@ public class Generator : IIncrementalGenerator
 {
     static SourceText projectFileContent;
     static SourceText projectDirectoryContent;
+    SourceText globalUsing = SourceText.From("global using ProjectFilesGenerator;\n", Encoding.UTF8);
 
     static Generator()
     {
@@ -33,19 +34,22 @@ public class Generator : IIncrementalGenerator
                 options.TryGetValue("build_property.MSBuildProjectFullPath", out var projectFile);
                 options.TryGetValue("build_property.SolutionDir", out var solutionDirectory);
                 options.TryGetValue("build_property.SolutionPath", out var solutionFile);
+                options.TryGetValue("build_property.ImplicitUsings", out var implicitUsings);
 
                 return new MsBuildProperties(
                     projectDirectpry,
                     projectFile,
                     solutionDirectory,
-                    solutionFile
+                    solutionFile,
+                    string.Equals(implicitUsings, "enable", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(implicitUsings, "true", StringComparison.OrdinalIgnoreCase)
                 );
             });
 
         // Get all additional files with CopyToOutputDirectory metadata
         var files = context.AdditionalTextsProvider
             .Combine(context.AnalyzerConfigOptionsProvider)
-            .Select((pair) =>
+            .Select(pair =>
             {
                 var (text, config) = pair;
 
@@ -92,6 +96,12 @@ public class Generator : IIncrementalGenerator
             context.AddSource("ProjectFiles.g.cs", SourceText.From(source, Encoding.UTF8));
             context.AddSource("ProjectFiles.ProjectDirectory.g.cs", projectDirectoryContent);
             context.AddSource("ProjectFiles.ProjectFile.g.cs", projectFileContent);
+
+            // Generate global using if ImplicitUsings is enabled
+            if (props.ImplicitUsingsEnabled)
+            {
+                context.AddSource("ProjectFiles.GlobalUsings.g.cs", globalUsing);
+            }
         });
     }
 
@@ -396,7 +406,8 @@ public class Generator : IIncrementalGenerator
         string? ProjectDirectory,
         string? ProjectFile,
         string? SolutionDirectory,
-        string? SolutionFile);
+        string? SolutionFile,
+        bool ImplicitUsingsEnabled);
 
     class DirectoryNode
     {

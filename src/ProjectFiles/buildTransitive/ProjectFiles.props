@@ -44,8 +44,8 @@
   -->
   <ItemGroup>
     <CompilerVisibleItemMetadata
-            Include="AdditionalFiles"
-            MetadataName="ProjectFilesGenerator" />
+      Include="AdditionalFiles"
+      MetadataName="ProjectFilesGenerator" />
   </ItemGroup>
 
   <!--
@@ -56,6 +56,7 @@
     <CompilerVisibleProperty Include="MSBuildProjectFullPath" />
     <CompilerVisibleProperty Include="SolutionDir" />
     <CompilerVisibleProperty Include="SolutionPath" />
+    <CompilerVisibleProperty Include="ImplicitUsings" />
   </ItemGroup>
 
 </Project>
