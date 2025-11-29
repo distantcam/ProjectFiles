@@ -9,12 +9,19 @@ namespace ProjectFilesGenerator
     /// <summary>Provides strongly-typed access to project files marked with CopyToOutputDirectory.</summary>
     static partial class ProjectFiles
     {
-        public static ProjectFile appsettings_Development_json { get; } = new("appsettings.Development.json");
-        public static ProjectFile appsettings_json { get; } = new("appsettings.json");
-        public static ProjectFile appsettings_Production_json { get; } = new("appsettings.Production.json");
+        public static FolderType Folder { get; } = new();
     }
 }
 
 namespace ProjectFilesGenerator.Types
 {
+partial class FolderType() : ProjectDirectory("Folder")
+{
+    public folder_Level1Type folder { get; } = new();
+    public partial class folder_Level1Type
+    {
+        public ProjectFile file_txt { get; } = new("Folder/folder/file.txt");
+    }
+
+}
 }

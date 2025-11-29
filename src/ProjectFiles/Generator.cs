@@ -76,10 +76,11 @@ public class Generator : IIncrementalGenerator
                 var (fileList, props) = data;
 
                 // Check for conflicts and report diagnostics
-                var conflicts = FindReservedNameConflicts(fileList);
+                var reservedConflicts = FindReservedNameConflicts(fileList);
+
                 var conflictingFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                foreach (var (file, property, isDirectory) in conflicts)
+                foreach (var (file, property, isDirectory) in reservedConflicts)
                 {
                     conflictingFiles.Add(file);
                     var descriptor = isDirectory ? reservedDirectoryNameConflict : reservedFileNameConflict;
@@ -275,14 +276,26 @@ public class Generator : IIncrementalGenerator
     {
         var indent = new string(' ', indentCount * 4);
 
+        // Get the parent class name for conflict detection
+        var parentClassName = Identifier.Build(Path.GetFileName(node.Path));
+
         // Generate subdirectory properties first
         foreach (var (name, childNode) in node.Directories.OrderBy(_ => _.Key))
         {
             cancel.ThrowIfCancellationRequested();
 
-            var className = Identifier.Build(name);
+            var baseClassName = Identifier.Build(name);
+            var className = baseClassName;
+
+            // Check if this subdirectory name matches the parent directory name
+            if (string.Equals(baseClassName, parentClassName, StringComparison.OrdinalIgnoreCase))
+            {
+                // Conflict detected - use depth-based suffix
+                className = $"{baseClassName}_Level{childNode.Depth}";
+            }
+
             // generate subdirectory property
-            builder.AppendLine($"{indent}public {className}Type {className} {{ get; }} = new();");
+            builder.AppendLine($"{indent}public {className}Type {baseClassName} {{ get; }} = new();");
 
             // generate nested type definitions for subdirectory
             builder.AppendLine(
@@ -354,7 +367,8 @@ public class Generator : IIncrementalGenerator
             {
                 topLevelNode = new()
                 {
-                    Path = topLevelName
+                    Path = topLevelName,
+                    Depth = 0
                 };
                 topLevelDirectories[topLevelName] = topLevelNode;
             }
@@ -373,7 +387,8 @@ public class Generator : IIncrementalGenerator
                 {
                     child = new()
                     {
-                        Path = currentPath
+                        Path = currentPath,
+                        Depth = i
                     };
                     current.Directories[part] = child;
                 }
@@ -414,6 +429,7 @@ public class Generator : IIncrementalGenerator
     class DirectoryNode
     {
         public required string Path { get; init; }
+        public required int Depth { get; init; }
         public Dictionary<string, DirectoryNode> Directories { get; } = [];
         public List<string> Files { get; } = [];
     }

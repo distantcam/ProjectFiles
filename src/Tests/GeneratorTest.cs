@@ -1569,12 +1569,14 @@ public class GeneratorTest
     [Test]
     public Task ContentWithUpdateAttribute()
     {
-        // Content items using Update attribute (modifies existing SDK-included files)
+        // Content items using Update attribute - this only works for files already in @(Content)
+        // In web projects, SDK includes files like appsettings*.json in @(Content) by default
+        // This test simulates that scenario
         var additionalFiles = new[]
         {
             CreateAdditionalText("appsettings.json", "content"),
             CreateAdditionalText("appsettings.Development.json", "content"),
-            CreateAdditionalText("web.config", "content")
+            CreateAdditionalText("appsettings.Production.json", "content")
         };
 
         var metadata = new Dictionary<string, Dictionary<string, string>>
@@ -1587,9 +1589,47 @@ public class GeneratorTest
             {
                 ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "appsettings.Development.json"
             },
-            ["web.config"] = new()
+            ["appsettings.Production.json"] = new()
             {
-                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "web.config"
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "appsettings.Production.json"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ContentWithIncludeAttribute()
+    {
+        // Content items using Include attribute - this adds new files to @(Content)
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("content.txt", "content"),
+            CreateAdditionalText("Templates/email.html", "content"),
+            CreateAdditionalText("Data/seed.sql", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["content.txt"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "content.txt"
+            },
+            ["Templates/email.html"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Templates/email.html"
+            },
+            ["Data/seed.sql"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Data/seed.sql"
             }
         };
 
@@ -1607,13 +1647,13 @@ public class GeneratorTest
     [Test]
     public Task ContentMixedIncludeAndUpdate()
     {
-        // Mix of Content with Include and Update
+        // Mix of Content Include (new files) and Update (SDK defaults in web projects)
         var additionalFiles = new[]
         {
-            CreateAdditionalText("Templates/email.html", "content"), // Include (new file)
-            CreateAdditionalText("appsettings.json", "content"),     // Update (SDK default)
-            CreateAdditionalText("Data/seed.sql", "content"),        // Include (new file)
-            CreateAdditionalText("web.config", "content")            // Update (existing file)
+            CreateAdditionalText("Templates/email.html", "content"),     // Include (new file)
+            CreateAdditionalText("appsettings.json", "content"),         // Update (SDK default in web projects)
+            CreateAdditionalText("Data/seed.sql", "content"),            // Include (new file)
+            CreateAdditionalText("appsettings.Development.json", "content") // Update (SDK default in web projects)
         };
 
         var metadata = new Dictionary<string, Dictionary<string, string>>
@@ -1630,9 +1670,159 @@ public class GeneratorTest
             {
                 ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Data/seed.sql"
             },
-            ["web.config"] = new()
+            ["appsettings.Development.json"] = new()
             {
-                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "web.config"
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "appsettings.Development.json"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task NestedDirectoryWithSameName()
+    {
+        // Directory/Nested/Nested/File.txt - should generate Nested_Level1Type for inner Nested
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("Directory/Nested/Nested/file.txt", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["Directory/Nested/Nested/file.txt"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Directory/Nested/Nested/file.txt"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task MultipleNestedDirectoriesWithSameName()
+    {
+        // Multiple files with nested directory conflicts - all should be generated with suffixes
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("Data/Data/config.json", "content"),
+            CreateAdditionalText("Config/Config/Config/settings.xml", "content"),
+            CreateAdditionalText("Valid/Path/file.txt", "content") // This one doesn't need suffixes
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["Data/Data/config.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Data/Data/config.json"
+            },
+            ["Config/Config/Config/settings.xml"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Config/Config/Config/settings.xml"
+            },
+            ["Valid/Path/file.txt"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Valid/Path/file.txt"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task NestedDirectoryConflictCaseInsensitive()
+    {
+        // Should detect conflict even with different casing and apply suffix
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("Folder/folder/file.txt", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["Folder/folder/file.txt"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Folder/folder/file.txt"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task DeeplyNestedWithSameNameAtDifferentLevels()
+    {
+        // Root/Level1/Level1/Level2/file.txt - conflict at Level1, should get suffix
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("Root/Level1/Level1/Level2/file.txt", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["Root/Level1/Level1/Level2/file.txt"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Root/Level1/Level1/Level2/file.txt"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task TriplyNestedSameDirectory()
+    {
+        // Test/Test/Test/file.txt - should generate Test_Level1Type and Test_Level2Type
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("Test/Test/Test/data.json", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["Test/Test/Test/data.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Test/Test/Test/data.json"
             }
         };
 
