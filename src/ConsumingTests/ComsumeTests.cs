@@ -20,6 +20,9 @@ public class ComsumeTests
         IsTrue(File.Exists(ProjectFiles.fileAtRoot_txt));
         IsTrue(File.Exists(ProjectFiles.globFileAtRoot_txt));
     }
+    [Test]
+    public void Content() =>
+        IsTrue(File.Exists(ProjectFiles.contentAtRoot_txt));
 
     [Test]
     public void Specific()

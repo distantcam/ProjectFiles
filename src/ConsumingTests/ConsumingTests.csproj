@@ -42,6 +42,9 @@
     <None Update="fileAtRoot.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="contentAtRoot.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Update="globFileAtRoot.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

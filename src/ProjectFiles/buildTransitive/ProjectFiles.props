@@ -21,7 +21,7 @@
   <Target Name="AddProjectFilesToAdditionalFiles"
           BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun">
     <ItemGroup>
-      <!-- Add items with CopyToOutputDirectory -->
+      <!-- Add None items with CopyToOutputDirectory -->
       <AdditionalFiles Include="@(None)"
                        ProjectFilesGenerator="%(RelativeDir)%(Filename)%(Extension)"
                        Condition="
@@ -33,6 +33,20 @@
                          (
                            '%(None.DefiningProjectFullPath)' == '$(MSBuildProjectFullPath)' OR
                            $([System.String]::Copy('%(None.DefiningProjectFullPath)').EndsWith('Microsoft.NET.Sdk.DefaultItems.props'))
+                         )
+                       " />
+      <!-- Add Content items with CopyToOutputDirectory -->
+      <AdditionalFiles Include="@(Content)"
+                       ProjectFilesGenerator="%(RelativeDir)%(Filename)%(Extension)"
+                       Condition="
+                         (
+                           '%(Content.CopyToOutputDirectory)' == 'PreserveNewest' OR
+                           '%(Content.CopyToOutputDirectory)' == 'Always'
+                         )
+                         AND
+                         (
+                           '%(Content.DefiningProjectFullPath)' == '$(MSBuildProjectFullPath)' OR
+                           $([System.String]::Copy('%(Content.DefiningProjectFullPath)').EndsWith('Microsoft.NET.Sdk.DefaultItems.props'))
                          )
                        " />
     </ItemGroup>

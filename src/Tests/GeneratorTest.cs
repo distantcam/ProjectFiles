@@ -1153,6 +1153,419 @@ public class GeneratorTest
         return Verify(driver);
     }
 
+    [Test]
+    public Task ContentAtRoot()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("contentAtRoot.txt", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["contentAtRoot.txt"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "contentAtRoot.txt"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ContentInDirectory()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("Data/config.json", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["Data/config.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Data/config.json"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task MixedContentAndNoneItems()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("web.config", "content"),
+            CreateAdditionalText("appsettings.json", "content"),
+            CreateAdditionalText("Templates/email.html", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["web.config"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "web.config"
+            },
+            ["appsettings.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "appsettings.json"
+            },
+            ["Templates/email.html"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Templates/email.html"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ContentWithAlwaysCopyToOutput()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("important.dat", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["important.dat"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "important.dat"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task MultipleContentItemsInNestedFolders()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("Assets/Images/logo.png", "content"),
+            CreateAdditionalText("Assets/Styles/theme.css", "content"),
+            CreateAdditionalText("Assets/Scripts/app.js", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["Assets/Images/logo.png"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Assets/Images/logo.png"
+            },
+            ["Assets/Styles/theme.css"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Assets/Styles/theme.css"
+            },
+            ["Assets/Scripts/app.js"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Assets/Scripts/app.js"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ContentWithoutCopyToOutputDirectoryShouldBeIgnored()
+    {
+        // Only files with the metadata are included by MSBuild target
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("included.txt", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["included.txt"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "included.txt"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ContentWithVariousExtensions()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("data.xml", "content"),
+            CreateAdditionalText("settings.yaml", "content"),
+            CreateAdditionalText("readme.md", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["data.xml"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "data.xml"
+            },
+            ["settings.yaml"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "settings.yaml"
+            },
+            ["readme.md"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "readme.md"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ContentItemsGenerateCorrectPropertyNames()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("web.config", "content"),
+            CreateAdditionalText("app.settings.json", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["web.config"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "web.config"
+            },
+            ["app.settings.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "app.settings.json"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ContentInMultipleLevelsOfNesting()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("Level1/Level2/Level3/deep.txt", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["Level1/Level2/Level3/deep.txt"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Level1/Level2/Level3/deep.txt"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ContentAndNoneInSameDirectory()
+    {
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("Config/web.config", "content"),
+            CreateAdditionalText("Config/app.json", "content"),
+            CreateAdditionalText("Config/database.xml", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["Config/web.config"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Config/web.config"
+            },
+            ["Config/app.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Config/app.json"
+            },
+            ["Config/database.xml"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Config/database.xml"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ContentWithGlobbingPattern()
+    {
+        // When using globbing in MSBuild (e.g., Content Include="Templates/**/*.html"),
+        // MSBuild expands it to individual files
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("Templates/email.html", "content"),
+            CreateAdditionalText("Templates/Invoice/invoice.html", "content"),
+            CreateAdditionalText("Templates/Invoice/Styles/invoice.css", "content"),
+            CreateAdditionalText("Templates/Receipt/receipt.html", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["Templates/email.html"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Templates/email.html"
+            },
+            ["Templates/Invoice/invoice.html"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Templates/Invoice/invoice.html"
+            },
+            ["Templates/Invoice/Styles/invoice.css"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Templates/Invoice/Styles/invoice.css"
+            },
+            ["Templates/Receipt/receipt.html"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Templates/Receipt/receipt.html"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task NestedContentItems()
+    {
+        // Content items nested within a specific subdirectory structure
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("wwwroot/assets/images/logo.svg", "content"),
+            CreateAdditionalText("wwwroot/assets/images/icons/home.svg", "content"),
+            CreateAdditionalText("wwwroot/assets/images/icons/settings.svg", "content"),
+            CreateAdditionalText("wwwroot/assets/styles/main.css", "content"),
+            CreateAdditionalText("wwwroot/assets/scripts/app.js", "content"),
+            CreateAdditionalText("wwwroot/index.html", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["wwwroot/assets/images/logo.svg"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "wwwroot/assets/images/logo.svg"
+            },
+            ["wwwroot/assets/images/icons/home.svg"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "wwwroot/assets/images/icons/home.svg"
+            },
+            ["wwwroot/assets/images/icons/settings.svg"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "wwwroot/assets/images/icons/settings.svg"
+            },
+            ["wwwroot/assets/styles/main.css"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "wwwroot/assets/styles/main.css"
+            },
+            ["wwwroot/assets/scripts/app.js"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "wwwroot/assets/scripts/app.js"
+            },
+            ["wwwroot/index.html"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "wwwroot/index.html"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
     static AdditionalText CreateAdditionalText(string path, string content) =>
         new MockAdditionalText(path, content);
 
