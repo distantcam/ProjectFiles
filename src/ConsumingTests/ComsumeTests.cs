@@ -21,6 +21,10 @@ public class ComsumeTests
         IsTrue(File.Exists(ProjectFiles.globFileAtRoot_txt));
     }
     [Test]
+    public void FileIncludeAtRoot() =>
+        IsTrue(File.Exists(ProjectFiles.fileIncludeAtRoot_txt));
+
+    [Test]
     public void Content() =>
         IsTrue(File.Exists(ProjectFiles.contentAtRoot_txt));
 

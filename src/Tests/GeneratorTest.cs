@@ -1566,6 +1566,87 @@ public class GeneratorTest
         return Verify(driver);
     }
 
+    [Test]
+    public Task ContentWithUpdateAttribute()
+    {
+        // Content items using Update attribute (modifies existing SDK-included files)
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("appsettings.json", "content"),
+            CreateAdditionalText("appsettings.Development.json", "content"),
+            CreateAdditionalText("web.config", "content")
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["appsettings.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "appsettings.json"
+            },
+            ["appsettings.Development.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "appsettings.Development.json"
+            },
+            ["web.config"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "web.config"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
+    [Test]
+    public Task ContentMixedIncludeAndUpdate()
+    {
+        // Mix of Content with Include and Update
+        var additionalFiles = new[]
+        {
+            CreateAdditionalText("Templates/email.html", "content"), // Include (new file)
+            CreateAdditionalText("appsettings.json", "content"),     // Update (SDK default)
+            CreateAdditionalText("Data/seed.sql", "content"),        // Include (new file)
+            CreateAdditionalText("web.config", "content")            // Update (existing file)
+        };
+
+        var metadata = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["Templates/email.html"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Templates/email.html"
+            },
+            ["appsettings.json"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "appsettings.json"
+            },
+            ["Data/seed.sql"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "Data/seed.sql"
+            },
+            ["web.config"] = new()
+            {
+                ["build_metadata.AdditionalFiles.ProjectFilesGenerator"] = "web.config"
+            }
+        };
+
+        var options = new MockOptionsProvider(metadata);
+
+        var driver = CSharpGeneratorDriver
+            .Create(new Generator())
+            .AddAdditionalTexts(additionalFiles)
+            .WithUpdatedAnalyzerConfigOptions(options)
+            .RunGenerators(CreateCompilation());
+
+        return Verify(driver);
+    }
+
     static AdditionalText CreateAdditionalText(string path, string content) =>
         new MockAdditionalText(path, content);
 
