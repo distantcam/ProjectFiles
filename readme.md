@@ -39,11 +39,11 @@ Mark files with `CopyToOutputDirectory` set to either `PreserveNewest` or `Alway
   <None Update="Config\appsettings.json">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </None>
-  
+
   <Content Include="RecursiveDirectory\**\*.txt">
     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
   </Content>
-  
+
   <None Include="SpecificDirectory\Dir1\*.txt">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </None>
@@ -59,7 +59,7 @@ Mark files with `CopyToOutputDirectory` set to either `PreserveNewest` or `Alway
 
 ```xml
 <Content Include="myfile.txt">
-<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 </Content>
 ```
 
@@ -68,7 +68,7 @@ Mark files with `CopyToOutputDirectory` set to either `PreserveNewest` or `Alway
 ```xml
 <!-- This ONLY works if appsettings.json is already in @(Content) -->
 <Content Update="appsettings.json">
-<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 </Content>
 ```
 
