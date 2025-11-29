@@ -29,6 +29,10 @@ public class ComsumeTests
         IsTrue(File.Exists(ProjectFiles.contentAtRoot_txt));
 
     [Test]
+    public void ContentUpdate() =>
+        IsTrue(File.Exists(ProjectFiles.contentUpdateAtRoot_txt));
+
+    [Test]
     public void Specific()
     {
         IsTrue(File.Exists(ProjectFiles.SpecificDirectory.Dir1.File1_txt));
