@@ -1,15 +1,5 @@
 <Project>
 
-  <Target Name="CheckSdkVersion" BeforeTargets="BeforeBuild">
-    <PropertyGroup>
-      <MinimumSdkVersion>10.0.100</MinimumSdkVersion>
-    </PropertyGroup>
-
-    <Error
-      Condition="$([MSBuild]::VersionLessThan($(NETCoreSdkVersion), $(MinimumSdkVersion)))"
-      Text="This project requires .NET SDK $(MinimumSdkVersion) or higher. Current SDK version is $(NETCoreSdkVersion)." />
-  </Target>
-
   <!--
     This MSBuild target automatically adds all files with CopyToOutputDirectory
     to AdditionalFiles so the source generator can access them with their metadata.
